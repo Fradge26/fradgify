@@ -13,12 +13,13 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Set up SSH
-      uses: webfactory/ssh-agent@v0.5.3
-      with:
-        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
-    - name: Deploy to server
+    - name: Clone repository if not present, or pull if already cloned
       run: |
+        if [ ! -d "/srv/fradgify/.git" ]; then
+          # Clone the repo if it doesn't exist
+          git clone https://github.com/Fradge26/fradgify.git /srv/fradgify
+        fi
+        # Navigate to the directory
         cd /srv/fradgify
+        # Pull the latest changes from the develop branch
         git pull origin develop
