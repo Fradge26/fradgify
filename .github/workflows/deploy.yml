@@ -20,5 +20,5 @@ jobs:
 
     - name: Deploy to server
       run: >
-          ssh -o StrictHostKeyChecking=no deploy_user@${{ secrets.FRADGIFY_IP }} "cd /var/www/tfl_modelling_tools && git pull origin develop && source ~/venv/bin/activate && pip install -r requirements.txt && sudo cp web_app/conf/tfl_modelling_tools.conf /etc/apache2/sites-available && sudo a2ensite tfl_modelling_tools && sudo systemctl reload apache2"
+          ssh -o StrictHostKeyChecking=no deploy_user@${{ secrets.FRADGIFY_IP }} "cd /srv/fradgify && git pull origin develop"
 
