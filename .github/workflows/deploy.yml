@@ -19,6 +19,6 @@ jobs:
         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
     - name: Deploy to server
-      run: >
-          ssh -o StrictHostKeyChecking=no devuser@${{ secrets.FRADGIFY_IP }} "cd /srv/fradgify && git pull origin develop"
-
+      run: |
+        cd /srv/fradgify
+        git pull origin develop
