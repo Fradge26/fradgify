@@ -23,22 +23,22 @@ jobs:
         cd /srv/fradgify
         # Pull the latest changes from the develop branch
         git pull origin develop
-    
+
     - name: Set up Python environment
-    run: |
-      cd /srv/fradgify
-      python3 -m venv venv
-      source venv/bin/activate
-      pip install --upgrade pip
-      pip install -r requirements.txt
-    
+      run: |
+        cd /srv/fradgify
+        python3 -m venv venv
+        source venv/bin/activate
+        pip install --upgrade pip
+        pip install -r requirements.txt
+
     - name: Enable Apache mods
-    run: |
-      sudo a2enmod rewrite
-      sudo a2enmod ssl
-      sudo a2enmod headers
-      sudo a2enmod cgi
-      sudo systemctl restart apache2
+      run: |
+        sudo a2enmod rewrite
+        sudo a2enmod ssl
+        sudo a2enmod headers
+        sudo a2enmod cgi
+        sudo systemctl restart apache2
 
     - name: Load Apache conf
       run: |
