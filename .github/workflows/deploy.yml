@@ -40,7 +40,6 @@ jobs:
         sudo a2enmod ssl
         sudo a2enmod headers
         sudo a2enmod cgi
-        sudo systemctl restart apache2
 
     - name: Deploy site files
       run: |
