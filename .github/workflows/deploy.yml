@@ -1,4 +1,4 @@
-name: Deploy to Ubuntu Server
+name: Deploy to Fradgify Dev Server
 
 on:
   push:
@@ -23,3 +23,30 @@ jobs:
         cd /srv/fradgify
         # Pull the latest changes from the develop branch
         git pull origin develop
+    
+      - name: Set up Python environment
+      run: |
+        cd /srv/fradgify
+        python3 -m venv venv
+        source venv/bin/activate
+        pip install --upgrade pip
+        pip install -r requirements.txt
+      
+      - name: Enable Apache mods
+      run: |
+        sudo a2enmod rewrite
+        sudo a2enmod ssl
+        sudo a2enmod headers
+        sudo a2enmod cgi
+        sudo systemctl restart apache2
+
+    - name: Load Apache conf
+      run: |
+        sudo cp /srv/fradgify/fradgify.kozow.com.conf /etc/apache2/sites-available/fradgify.kozow.com.conf
+        sudo a2ensite fradgify.kozow.com.conf
+        sudo systemctl reload apache2
+
+    - name: Deploy site files
+      run: |
+        sudo rsync -av --delete /srv/fradgify/flask_app/ /var/www/fradgify.kozow.com/flask_app/
+        sudo rsync -av --delete /srv/fradgify/static/ /var/www/fradgify.kozow.com/static/
