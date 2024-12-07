@@ -20,5 +20,5 @@ jobs:
 
     - name: Deploy to server
       run: >
-          ssh -o StrictHostKeyChecking=no deploy_user@${{ secrets.FRADGIFY_IP }} "cd /srv/fradgify && git pull origin develop"
+          ssh -o StrictHostKeyChecking=no devuser@${{ secrets.FRADGIFY_IP }} "cd /srv/fradgify && git pull origin develop"
 
