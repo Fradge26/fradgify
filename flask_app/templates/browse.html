@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Album Browser</title>
+    <!-- Include jQuery and DataTables CSS and JS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.1.8/css/dataTables.dataTables.min.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.datatables.net/2.1.8/js/dataTables.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+        
+        /* Remove button border, background, and outline */
+        .play-button {
+            background: none;
+            border: none;
+            outline: none;
+            padding: 0;
+            cursor: pointer;
+        }
+
+        /* Align SVG icons and remove focus outline */
+        .play-button img {
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .play-button:focus {
+            outline: none; /* Removes the focus outline */
+        }
+
+        /* Center the play button in the table cell */
+        td.play-cell {
+            text-align: center; /* Centers the button horizontally */
+            vertical-align: middle; /* Centers the button vertically */
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Album Browser</h1>
+    <table id="albums" class="display">
+        <thead>
+            <tr>
+                <th>Artist</th>
+                <th>Album</th>
+                <th>Year</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Data will be populated here -->
+        </tbody>
+    </table>
+
+    <script src="album-browser.js"></script>
+</body>
+</html>
