@@ -44,7 +44,7 @@ jobs:
 
     - name: Load Apache conf
       run: |
-        sudo cp /srv/fradgify/fradgify.kozow.com.conf /etc/apache2/sites-available/fradgify.kozow.com.conf
+        sudo cp /srv/fradgify/apache/fradgify.kozow.com.conf /etc/apache2/sites-available/fradgify.kozow.com.conf
         sudo a2ensite fradgify.kozow.com.conf
         sudo systemctl reload apache2
 
@@ -52,3 +52,4 @@ jobs:
       run: |
         sudo rsync -av --delete /srv/fradgify/flask_app/ /var/www/fradgify.kozow.com/flask_app/
         sudo rsync -av --delete /srv/fradgify/static/ /var/www/fradgify.kozow.com/static/
+        sudo cp /srv/fradgify/apache/flask_app.wsgi /var/www/fradgify.kozow.com/flask_app/flask_app.wsgi
