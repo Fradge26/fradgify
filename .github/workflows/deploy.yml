@@ -57,18 +57,6 @@ jobs:
         source ~/.bashrc
         ~/.acme.sh/acme.sh --upgrade --install-cronjob
 
-    - name: Issue SSL Certificates using acme.sh
-      run: |
-        # Set up the environment for acme.sh
-        export PATH="$HOME/.acme.sh:$PATH"
-        # Issue the SSL certificate
-        ~/.acme.sh/acme.sh --issue --webroot /var/www/fradgify.kozow.com -d fradgify.kozow.com -d www.fradgify.kozow.com --force
-        # Install the certificate
-        ~/.acme.sh/acme.sh --install-cert -d fradgify.kozow.com \
-          --key-file /etc/ssl/private/fradgify.kozow.com.key \
-          --fullchain-file /etc/ssl/certs/fradgify.kozow.com.cert \
-          --reloadcmd "systemctl reload apache2"
-
     - name: Deploy site files
       run: |
         sudo mkdir -p /var/www/fradgify.kozow.com/flask_app
@@ -81,5 +69,17 @@ jobs:
       run: |
         sudo cp /srv/fradgify/apache/fradgify.kozow.com.conf /etc/apache2/sites-available/fradgify.kozow.com.conf
         sudo a2ensite fradgify.kozow.com.conf
+
+    - name: Issue SSL Certificates using acme.sh
+      run: |
+        # Set up the environment for acme.sh
+        export PATH="$HOME/.acme.sh:$PATH"
+        # Issue the SSL certificate
+        ~/.acme.sh/acme.sh --issue --webroot /var/www/fradgify.kozow.com -d fradgify.kozow.com -d www.fradgify.kozow.com --force
+        # Install the certificate
+        ~/.acme.sh/acme.sh --install-cert -d fradgify.kozow.com \
+          --key-file /etc/ssl/private/fradgify.kozow.com.key \
+          --fullchain-file /etc/ssl/certs/fradgify.kozow.com.cert \
+          --reloadcmd "systemctl reload apache2"
         sudo systemctl start apache2
         sudo systemctl reload apache2
