@@ -40,6 +40,7 @@ jobs:
         sudo a2enmod ssl
         sudo a2enmod headers
         sudo a2enmod cgi
+        sudo a2enmod wsgi
 
     - name: Deploy site files
       run: |
