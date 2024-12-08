@@ -71,7 +71,7 @@ jobs:
         # Set up the environment for acme.sh
         export PATH="$HOME/.acme.sh:$PATH"
         # Issue the SSL certificate
-        ~/.acme.sh/acme.sh --issue --webroot /var/www/fradgify.kozow.com -d fradgify.kozow.com -d www.fradgify.kozow.com --force
+        ~/.acme.sh/acme.sh --issue --webroot /var/www/fradgify.kozow.com -d fradgify.kozow.com -d www.fradgify.kozow.com --force --sever letsencrypt
         # Install the certificate
         ~/.acme.sh/acme.sh --install-cert -d fradgify.kozow.com \
           --key-file /etc/ssl/private/fradgify.kozow.com.key \
