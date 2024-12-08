@@ -57,12 +57,17 @@ jobs:
         source ~/.bashrc
         ~/.acme.sh/acme.sh --upgrade --install-cronjob
 
-    - name: Issue SSL Certificate
+    - name: Issue SSL Certificates using acme.sh
       run: |
-        ~/.acme.sh/acme.sh --issue -d fradgify.kozow.com --webroot /var/www/fradgify.kozow.com
+        # Set up the environment for acme.sh
+        export PATH="$HOME/.acme.sh:$PATH"
+        # Issue the SSL certificate
+        ~/.acme.sh/acme.sh --issue --webroot /var/www/fradgify.kozow.com -d fradgify.kozow.com -d www.fradgify.kozow.com --force
+        # Install the certificate
         ~/.acme.sh/acme.sh --install-cert -d fradgify.kozow.com \
           --key-file /etc/ssl/private/fradgify.kozow.com.key \
           --fullchain-file /etc/ssl/certs/fradgify.kozow.com.cert \
+          --reloadcmd "systemctl reload apache2"
 
     - name: Deploy site files
       run: |
