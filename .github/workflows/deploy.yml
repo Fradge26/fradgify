@@ -17,10 +17,6 @@ jobs:
       run: |
         sudo apt update
         sudo apt install -y apache2 libapache2-mod-wsgi-py3 git python3.10-venv certbot python3-certbot-apache
-    
-    - name: Obtain SSL certificate using Certbot
-      run: |
-        sudo certbot --apache -d fradgify.kozow.com -d www.fradgify.kozow.com --non-interactive --agree-tos --email fradge@hotmail.co.uk
 
     - name: Clone repository if not present, or pull if already cloned
       run: |
