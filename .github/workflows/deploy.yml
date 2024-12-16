@@ -46,12 +46,6 @@ jobs:
         sudo a2enmod headers
         sudo a2enmod cgi
         sudo a2enmod wsgi
-    
-    - name: Install acme.sh
-      run: |
-        curl https://get.acme.sh | sh
-        source ~/.bashrc
-        ~/.acme.sh/acme.sh --upgrade --install-cronjob
 
     - name: Deploy site files
       run: |
@@ -65,17 +59,3 @@ jobs:
       run: |
         sudo cp /srv/fradgify/apache/dev.fradgify.kozow.com.conf /etc/apache2/sites-available/dev.fradgify.kozow.com.conf
         sudo a2ensite dev.fradgify.kozow.com.conf
-
-    - name: Issue SSL Certificates using acme.sh
-      run: |
-        # Set up the environment for acme.sh
-        export PATH="$HOME/.acme.sh:$PATH"
-        # Issue the SSL certificate
-        ~/.acme.sh/acme.sh --issue --webroot /var/www/dev.fradgify.kozow.com -d dev.fradgify.kozow.com -d www.dev.fradgify.kozow.com --force --server letsencrypt
-        # Install the certificate
-        ~/.acme.sh/acme.sh --install-cert -d dev.fradgify.kozow.com \
-          --key-file /etc/ssl/private/dev.fradgify.kozow.com.key \
-          --fullchain-file /etc/ssl/certs/dev.fradgify.kozow.com.cert \
-          --reloadcmd "systemctl reload apache2"
-        sudo systemctl start apache2
-        sudo systemctl reload apache2
