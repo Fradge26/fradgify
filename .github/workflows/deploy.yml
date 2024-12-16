@@ -59,3 +59,4 @@ jobs:
       run: |
         sudo cp /srv/fradgify/apache/dev.fradgify.kozow.com.conf /etc/apache2/sites-available/dev.fradgify.kozow.com.conf
         sudo a2ensite dev.fradgify.kozow.com.conf
+        sudo systemctl reload apache2
