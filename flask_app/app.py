@@ -12,10 +12,12 @@ from urllib.parse import quote
 logging.basicConfig(level=logging.DEBUG)
 app = Flask(__name__)
 
-MUSIC_FOLDER = "/var/www/fradgify.kozow.com/media/music/complete"
-ALBUMS_JSON_PATH = "/var/www/fradgify.kozow.com/album-player/browse/albums.json"
-TEMP_ALBUM_ART_FOLDER = "/var/www/fradgify.kozow.com/album-player/album-art-extract"
+SITE_DOMAIN = "dev.fradgify.kozow.com"
+MUSIC_FOLDER = f"/var/www/{SITE_DOMAIN}/media/music/complete"
+ALBUMS_JSON_PATH = f"/var/www/{SITE_DOMAIN}/album-player/browse/albums.json"
+TEMP_ALBUM_ART_FOLDER = f"/var/www/{SITE_DOMAIN}/album-player/album-art-extract"
 logging.debug(f"api started: {__file__}")
+
 
 @app.route('/album', methods=['GET'])
 def get_album():
