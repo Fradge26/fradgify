@@ -6,33 +6,55 @@
     <title>Fradgify: Streaming you can trust!</title>
     <link rel="icon" href="{{ url_for('static', filename='icons/favicon.ico') }}" type="image/x-icon">
     <style>
+        /* Body default styling */
         body {
+            margin: 0;
             background-color: rgb(232, 250, 250);
+        }
+
+        /* Ensure SVG has no gaps */
+        .top-image {
+            display: block;
+            margin: 0;
+        }
+
+        /* Consistent spacing for headings and links */
+        .content {
+            margin-left: 1em; /* Uniform left margin for all content below */
         }
         h2 {
             font-size: 1.5em;
-            margin-bottom: 0.2em;
+            margin: 1em 0 0.2em 0; /* Adjusted to work with .content margin */
+        }
+        a {
+            display: block;
+            margin: 0.2em 0; /* Spacing between links */
         }
     </style>
 </head>
 <body>
-    <img src="{{ url_for('static', filename='images/fradgify_full.jpg') }}" alt="Fradgify Logo">
-    <h2>Where is Luke?</h2>
-    <a href="https://fradgify.kozow.com/whereisluke">Find out</a><br>
+    <!-- SVG image with no gaps -->
+    <img class="top-image" src="{{ url_for('static', filename='images/fradgify_tight.svg') }}" alt="Fradgify Logo">
 
-    <h2>Media Libraries</h2>
-    <a href="https://fradgify.kozow.com/media/movies">Movies</a><br>
-    <a href="https://fradgify.kozow.com/media/tv">TV</a><br>
-    <a href="https://fradgify.kozow.com/media/music">Music</a><br>
-    <a href="https://fradgify.kozow.com/media/sheets">Sheet Music</a><br>
+    <!-- Content wrapper for consistent spacing -->
+    <div class="content">
+        <h2>Media Libraries</h2>
+        <a href="/media/movies">Movies</a>
+        <a href="/media/tv">TV</a>
+        <a href="/media/music">Music</a>
+        <a href="/media/sheets">Sheet Music</a>
 
-    {% for library, files in latest_files.items() %}
-        <h2>Latest {{ library }}</h2>
-        {% for file in files %}
-            <a href="{{ file }}">{{ file.split('/')[-1] }}</a><br>
+        {% for library, files in latest_files.items() %}
+            <h2>Latest {{ library }}</h2>
+            {% for file in files %}
+                <a href="{{ file }}">{{ file.split('/')[-1] }}</a>
+            {% endfor %}
         {% endfor %}
-    {% endfor %}
 
-    <h4><a href="https://fradgify.kozow.com/media/report" target="_blank">Site Traffic Dashboard</a></h4>
+        <h2>Where is Luke?</h2>
+        <a href="/whereisluke">Find out</a>
+
+        <h4><a href="/media/report" target="_blank">Site Traffic Dashboard</a></h4>
+    </div>
 </body>
 </html>

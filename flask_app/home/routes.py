@@ -39,6 +39,7 @@ def get_latest(library, exts, num_files=10):
 def list_video_folders(directory, exts):
     video_files = []
     top_level_dir = os.path.basename(os.path.normpath(directory))
+    print("top_level_dir", top_level_dir)
     for dirpath, dirnames, filenames in os.walk(directory):
         if os.path.basename(dirpath) == top_level_dir:
             continue
@@ -53,6 +54,7 @@ def list_video_folders(directory, exts):
 
 def get_recent_files(directory, exts, num_files=10):
     out_files = []
+    print("directory", directory)
     video_folder = list_video_folders(directory, exts)
     sorted_folders = sorted(video_folder, key=lambda x: os.path.getmtime(os.path.join(directory, x)), reverse=True)
     for file in sorted_folders[:num_files]:
