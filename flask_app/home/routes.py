@@ -39,6 +39,7 @@ def get_latest(library, exts, num_files=10):
 def list_video_folders(directory, exts):
     video_files = []
     top_level_dir = os.path.basename(os.path.normpath(directory))
+    print("csv", os.getcwd())
     print("top_level_dir", top_level_dir)
     for dirpath, dirnames, filenames in os.walk(directory):
         if os.path.basename(dirpath) == top_level_dir:
