@@ -5,9 +5,9 @@ from pathlib import Path
 
 
 SERVER_SITE_HOME = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+MEDIA_DIR = os.path.join(SERVER_SITE_HOME, "media")
 SITE_DOMAIN = "dev.fradgify.kozow.com"
 CWD_DIR = os.getcwd()
-MEDIA_DIR = os.path.join(CWD_DIR, "..", "media")
 VIDEO_EXT = {'.mp4', '.avi', '.mov', '.mkv', '.wmv', '.flv', '.webm', '.mpeg', '.mpg'}
 AUDIO_EXT = {".mp3", ".flac"}
 SHEET_EXT = ".pdf"
