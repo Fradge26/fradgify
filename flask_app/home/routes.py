@@ -3,6 +3,8 @@ from . import home_bp
 import os
 from pathlib import Path
 
+
+SERVER_SITE_HOME = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 SITE_DOMAIN = "dev.fradgify.kozow.com"
 CWD_DIR = os.getcwd()
 MEDIA_DIR = os.path.join(CWD_DIR, "..", "media")
@@ -39,9 +41,9 @@ def get_latest(library, exts, num_files=10):
 def list_video_folders(directory, exts):
     video_files = []
     top_level_dir = os.path.basename(os.path.normpath(directory))
-    print("csv", os.getcwd())
+    print("SERVER_SITE_HOME", SERVER_SITE_HOME)
     print("top_level_dir", top_level_dir)
-    for dirpath, dirnames, filenames in os.walk(directory):
+    for dirpath, dirnames, filenames in os.walk(os.path.join(SERVER_SITE_HOME, directory)):
         if os.path.basename(dirpath) == top_level_dir:
             continue
         for entry in filenames:
