@@ -33,9 +33,10 @@ def homepage():
 def get_latest(library, exts, num_files=10):
     directory_url = os.path.join(MEDIA_DIR, library.lower())
     site_url = f"https://{SITE_DOMAIN}/media/{library.lower()}"
-    files = get_recent_files(directory_url, exts, num_files)
-    print(MEDIA_DIR, library, files)
-    return [os.path.join(site_url, os.path.basename(file)) for file in files]
+    folders = get_recent_folders(directory_url, exts, num_files)
+    print(MEDIA_DIR, library, folders)
+    relative_paths = [os.path.relpath(folder, SERVER_SITE_HOME) for folder in folders]
+    return relative_paths
 
 
 def list_video_folders(directory, exts):
@@ -55,7 +56,7 @@ def list_video_folders(directory, exts):
     return video_files
 
 
-def get_recent_files(directory, exts, num_files=10):
+def get_recent_folders(directory, exts, num_files=10):
     out_files = []
     print("directory", directory)
     video_folder = list_video_folders(directory, exts)
