@@ -43,8 +43,10 @@ def where_is_luke():
 
                 # Extract IP, time, and filename using regex
                 match = re.match(log_pattern, most_recent_line)
+                print(match)
 
                 if match:
+                    print("match found")
                     ip_address = match.group(1)
                     time = match.group(2)
                     raw_filename = os.path.basename(match.group(3))
@@ -56,15 +58,16 @@ def where_is_luke():
                     lat, lng, city, country = get_ip_location(ip_address)
                     luke_is_safe = True
         except Exception as e:
+            print(e)
             return render_template("luke_is_lost.html")
 
     if luke_is_safe:
         return render_template('luke_is_safe.html',
-                           decoded_filename=decoded_filename,
-                           time=time,
-                           ip_address=ip_address,
-                           lat=lat, lng=lng,
-                           city=city, country=country)
+                               decoded_filename=decoded_filename,
+                               time=time,
+                               ip_address=ip_address,
+                               lat=lat, lng=lng,
+                               city=city, country=country)
     else:
         return render_template("luke_is_lost.html")
 
