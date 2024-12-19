@@ -33,6 +33,7 @@ def where_is_luke():
             if not buzzcocks_lines:
                 for filename in sorted(os.listdir(log_dir_path)):
                     if rotated_log_pattern.match(filename):
+                        print(f"reading {filename}")
                         read_log_file(os.path.join(log_dir_path, filename), buzzcocks_lines)
                         if buzzcocks_lines:
                             break
