@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Where is Luke???</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='icons/favicon.ico') }}">
+    <style>
+        body {
+            background-color: rgb(232, 250, 250);
+        }
+    </style>
+
+    <!-- Leaflet CSS and JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+</head>
+<body>
+    <img src="{{ url_for('static', filename='images/fradgify_tight.svg') }}" alt="Description of the image" style="max-width: 100%; height: auto;">
+    <h1>Where is Luke???</h1>
+
+    {% if decoded_filename %}
+        <p><strong>Last seen watching:</strong> {{ decoded_filename }}</p>
+        <p><strong>On:</strong> {{ time }}</p>
+        <p><strong>From IP Address:</strong> {{ ip_address }}</p>
+
+        {% if lat and lng %}
+            <p><strong>Located at: </strong>{{ lat }}, {{ lng }} (lat, long)</p>
+            <p><strong>In: </strong>{{ city }}, {{ country }}</p>
+            <div id="map" style="height: 600px;"></div>
+            <script>
+                var map = L.map('map').setView([{{ lat }}, {{ lng }}], 5);
+                L.tileLayer('https://{{s}}.tile.openstreetmap.org/{{z}}/{{x}}/{{y}}.png', {
+                    maxZoom: 19,
+                }).addTo(map);
+
+                var marker = L.marker([{{ lat }}, {{ lng }}]).addTo(map);
+                marker.bindPopup("<b>IP Location</b><br>Lat: {{ lat }}<br>Lng: {{ lng }}").openPopup();
+            </script>
+        {% else %}
+            <p>Could not find geolocation for the IP address.</p>
+        {% endif %}
+    {% else %}
+        <p>{{ error }}</p>
+    {% endif %}
+</body>
+</html>

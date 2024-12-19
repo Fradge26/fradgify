@@ -7,4 +7,5 @@ home_bp = Blueprint(
 )
 
 # Import the routes related to the homepage
-from . import routes
+from . import home_route
+from . import find_luke

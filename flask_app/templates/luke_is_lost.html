@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Where is Luke???</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='icons/favicon.ico') }}">
+    <style>
+        body {
+            background-color: rgb(232, 250, 250);
+        }
+    </style>
+
+    <!-- Leaflet CSS and JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+</head>
+<body>
+    <img src="{{ url_for('static', filename='images/fradgify_tight.svg') }}" alt="Description of the image" style="max-width: 100%; height: auto;">
+    <h1>Oh No! Luke is lost!!</h1>
+</body>
+</html>
