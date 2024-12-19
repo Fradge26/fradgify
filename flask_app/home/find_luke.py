@@ -11,6 +11,7 @@ from flask import Flask, render_template
 
 @home_bp.route('/whereisluke')
 def where_is_luke():
+    print("print working")
     luke_is_safe = False
     # Paths to the Apache access log and rotated logs
     log_dir_path = '/var/log/apache2/'
