@@ -22,6 +22,7 @@ def where_is_luke():
 
     buzzcocks_lines = []
     if os.path.exists(current_log):
+        print("path exists")
         try:
             # Check the current log file
             read_log_file(current_log, buzzcocks_lines)
@@ -42,6 +43,7 @@ def where_is_luke():
 
             # Get the most recent line
             if buzzcocks_lines:
+                print("found lines")
                 most_recent_line = buzzcocks_lines[-1]  # The last one is the most recent
 
                 # Extract IP, time, and filename using regex
