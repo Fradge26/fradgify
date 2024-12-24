@@ -15,6 +15,7 @@ def where_is_luke():
     luke_is_safe = False
     # Paths to the Apache access log and rotated logs
     log_dir_path = '/var/log/apache2/'
+    log_dir_path = "D:/dump/"
     current_log = log_dir_path + 'access.log'
     rotated_log_pattern = re.compile(r'access\.log\.\d+\.gz')
     # Regex pattern to match IP, time, and requested filename from an Apache log line
@@ -50,8 +51,8 @@ def where_is_luke():
                 match = re.match(log_pattern, most_recent_line)
                 print(match)
 
-                if match:
-                    print("match found")
+                if match and len(match.groups()) == 4:
+                    print("match found", match)
                     ip_address = match.group(1)
                     time = match.group(2)
                     raw_filename = os.path.basename(match.group(3))
@@ -62,6 +63,8 @@ def where_is_luke():
                     # Get IP geolocation (latitude and longitude)
                     lat, lng, city, country = get_ip_location(ip_address)
                     luke_is_safe = True
+                elif len(match.groups()) < 4:
+                    print(match.groups())
         except Exception as e:
             print(e)
             return render_template("luke_is_lost.html")
@@ -102,4 +105,4 @@ def get_ip_location(ip):
                 return lat, lng, data["city"], data["country"]
     except Exception as e:
         print(f"Error fetching IP location: {e}")
-    return None, None
+    return None, None, None, None
