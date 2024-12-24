@@ -15,7 +15,7 @@ def where_is_luke():
     luke_is_safe = False
     # Paths to the Apache access log and rotated logs
     log_dir_path = '/var/log/apache2/'
-    log_dir_path = "D:/dump/"
+    # log_dir_path = "D:/dump/"
     current_log = log_dir_path + 'access.log'
     rotated_log_pattern = re.compile(r'access\.log\.\d+\.gz')
     # Regex pattern to match IP, time, and requested filename from an Apache log line
