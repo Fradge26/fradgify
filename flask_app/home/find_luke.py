@@ -70,6 +70,7 @@ def where_is_luke():
             return render_template("luke_is_lost.html")
 
     if luke_is_safe:
+        print(decoded_filename, time, ip_address, lat, lng, city, country)
         return render_template('luke_is_safe.html',
                                decoded_filename=decoded_filename,
                                time=time,
