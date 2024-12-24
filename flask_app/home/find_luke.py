@@ -51,7 +51,7 @@ def where_is_luke():
                 match = re.match(log_pattern, most_recent_line)
                 print(match)
 
-                if match and len(match.groups()) == 4:
+                if match and len(match.groups()) == 3:
                     print("match found", match)
                     ip_address = match.group(1)
                     time = match.group(2)
@@ -63,7 +63,7 @@ def where_is_luke():
                     # Get IP geolocation (latitude and longitude)
                     lat, lng, city, country = get_ip_location(ip_address)
                     luke_is_safe = True
-                elif len(match.groups()) < 4:
+                elif len(match.groups()) < 3:
                     print(match.groups())
         except Exception as e:
             print(e)
