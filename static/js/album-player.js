@@ -10,13 +10,14 @@ const albumNameElement = document.getElementById('album-name');
 const albumArtElement = document.getElementById('album-art');
 const trackListElement = document.getElementById('track-list');
 const trackInfoElement = document.getElementById('track-info');
-const musicBaseFolder = "https://fradgify.kozow.com/media/music/complete"
-const albumArtExtractFolder = "https://fradgify.kozow.com/album-player/album-art-extract"
-const defaultAlbumArt = "vinyl_cat.gif"
+// const musicBaseFolder = "https://fradgify.kozow.com/media/music/complete";
+const musicBaseFolder = "/media/music/complete";
+const albumArtExtractFolder = "https://fradgify.kozow.com/album-player/album-art-extract";
+const defaultAlbumArt = "vinyl_cat.gif";
 
 // Function to fetch album data from the server with a dynamic folder path
 function fetchAlbumData(folderPath) {
-    fetch(`/api/album?path=${encodeURIComponent(folderPath)}`)
+    fetch(`/music/album/?path=${encodeURIComponent(folderPath)}`)
         .then(response => response.json())
         .then(data => {
             albumTracks = data.musicFiles.map(file => {
@@ -238,7 +239,7 @@ function renderTrackList() {
 
         // Create the play button
         const playButton = document.createElement('button');
-        playButton.innerHTML = '<img src="../icons/play_arrow_37dp_007BFF_FILL0_wght400_GRAD0_opsz40.svg" alt="Play" width="24" height="24">';
+        playButton.innerHTML = '<img src="/static/icons/play_arrow_37dp_007BFF_FILL0_wght400_GRAD0_opsz40.svg" alt="Play" width="24" height="24">';
         playButton.onclick = () => playTrack(index, albumTracks); // Play the clicked track
         playButton.style.padding = '2px';
         playButton.style.width = '30px';
@@ -246,7 +247,7 @@ function renderTrackList() {
 
         // Create the download button
         const downloadButton = document.createElement('button');
-        downloadButton.innerHTML = '<img src="../icons/download_37dp_007BFF_FILL0_wght400_GRAD0_opsz40.svg" alt="Download" width="24" height="24">';
+        downloadButton.innerHTML = '<img src="/static/icons/download_37dp_007BFF_FILL0_wght400_GRAD0_opsz40.svg" alt="Download" width="24" height="24">';
         downloadButton.onclick = () => downloadTrack(track); // Function to download the track
         downloadButton.style.padding = '2px';
         downloadButton.style.width = '30px';
@@ -262,13 +263,7 @@ function renderTrackList() {
 
         // Append the list item to the track list
         trackListElement.appendChild(listItem);
-
-
-
-
-
         console.log("END", listItem)
-        
     });
     console.log("Album tracks:", albumTracks);
 }

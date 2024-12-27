@@ -1,25 +1,42 @@
-from flask import Flask, jsonify, send_from_directory, request
-import os
+from . import music_bp
 import logging
+import os
+from flask import Flask, jsonify, send_from_directory, request, render_template
 from mutagen import File
 from mutagen.id3 import ID3, APIC
 from collections import defaultdict
 import json
 import hashlib
 from datetime import datetime as dt
-from urllib.parse import quote
 
-logging.basicConfig(level=logging.DEBUG)
-app = Flask(__name__)
 
 SITE_DOMAIN = "dev.fradgify.kozow.com"
-MUSIC_FOLDER = f"/var/www/{SITE_DOMAIN}/media/music/complete"
-ALBUMS_JSON_PATH = f"/var/www/{SITE_DOMAIN}/album-player/browse/albums.json"
-TEMP_ALBUM_ART_FOLDER = f"/var/www/{SITE_DOMAIN}/album-player/album-art-extract"
+SERVER_SITE_HOME = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+MEDIA_DIR = os.path.join(SERVER_SITE_HOME, "media")
+MUSIC_FOLDER = os.path.join(MEDIA_DIR, "music", "complete")
+ALBUMS_JSON_PATH = os.path.join(SERVER_SITE_HOME, "static", "json", "albums.json")
+TEMP_ALBUM_ART_FOLDER = os.path.join(SERVER_SITE_HOME, "static", "album-art")
 logging.debug(f"api started: {__file__}")
 
 
-@app.route('/album', methods=['GET'])
+@music_bp.route('/favicon.ico')
+def favicon():
+    return send_from_directory('static/icons', 'favicon.svg', type='image/svg+xml')
+
+
+@music_bp.route('/browse')
+def browse():
+    return render_template('browse.html')
+
+
+@music_bp.route('/play/')
+def play():
+    # Get the 'path' query parameter
+    path = request.args.get('path', '')  # Default to an empty string if 'path' is not provided
+    return render_template('play.html', path=path)
+
+
+@music_bp.route('/album/', methods=['GET'])
 def get_album():
     # Get the folder path from the query parameter
     logging.debug(f"api endpoint /album called")
@@ -42,83 +59,8 @@ def get_album():
         logging.debug(f"Exception: {e}")
         return jsonify({'error': str(e)}), 500
 
-def list_music_files(folder):
-    filenames = os.listdir(folder.encode("utf-8"))
-    out_files = [f.decode('utf-8').encode('utf-8', "surrogatepass").decode('utf-8') for f in filenames]
-    out_files = [f for f in out_files if f.endswith(".mp3")]
-    logging.debug(f"out_files: {out_files}")
-    return sorted(out_files)
 
-def get_album_art_path(album_path, audio):
-    logging.debug("0")
-    album_art = next((f for f in os.listdir(album_path) if f.lower().endswith('.jpg')), None)
-    logging.debug("1")
-    if album_art:
-        return album_art
-    # Look for the album art (APIC) frame
-    for tag in audio.values():
-        if isinstance(tag, APIC):
-            logging.debug("2")
-            album_art_data = tag.data
-            album_art_mime = tag.mime.split('/')[-1]  # Get the image file extension
-            hash_object = hashlib.sha256(album_art_data)
-            short_hash = hash_object.hexdigest()[:12]
-            logging.debug(short_hash)
-            album_art_filename = f'{short_hash}.{album_art_mime}'
-            album_art_filepath = os.path.join(TEMP_ALBUM_ART_FOLDER, album_art_filename)
-            
-            # Save the album art as an image file
-            with open(album_art_filepath, 'wb') as img_file:
-                img_file.write(album_art_data)
-            
-            logging.debug(f"Album art extracted to: {album_art_filepath}")
-            return album_art_filename
-    else:
-        return None
-
-def get_audio_file_info(audio):
-    if audio is not None:
-        # Extract artist and album, handle various file types by inspecting the tag names
-        if 'TPE2' in audio:  # For MP3 ID3 tags
-            artist = audio['TPE2'][0]
-        elif 'TPE1' in audio:  # For MP3 ID3 tags
-            artist = audio['TPE1'][0]
-        elif 'artist' in audio:
-            artist = audio['artist'][0]
-        else:
-            artist = 'Unknown Artist'
-
-        if 'TALB' in audio:  # For MP3 ID3 tags
-            # logging.debug(f"TALB: {audio['TALB']}")
-            # logging.debug(f"TALB: {audio['TALB'][0]}")
-            album = audio['TALB'][0]
-        elif 'album' in audio:
-            album = audio['album'][0]
-        else:
-            album = 'Unknown Album'
-        if "TDRC" in audio:
-            year = audio.get("TDRC")[0].year
-        elif "year" in audio:
-            year = audio.get('year')[0]
-        elif "date" in audio:    
-            year = audio.get('date')[0]
-        else:
-            year = ''
-
-    else:
-        artist = 'Unknown Artist'
-        album = 'Unknown Album'
-        year = ""
-    return upper_first_word(artist), upper_first_word(album), year
-
-def upper_first_word(word):
-    return f"{word[0].upper()}{word[1:]}"
-
-@app.route('/health', methods=['GET'])
-def health_check():
-    return jsonify({"status": "running"}), 200
-
-@app.route('/album_list', methods=['GET'])
+@music_bp.route('/album_list', methods=['GET'])
 def get_album_list():
     # Get the folder path from the query parameter
     logging.debug(f"api endpoint /album_list called")
@@ -156,6 +98,83 @@ def get_album_list():
         logging.debug(f"Exception: {e}")
         return jsonify({'error': str(e)}), 500
 
+
+def list_music_files(folder):
+    filenames = os.listdir(folder.encode("utf-8"))
+    out_files = [f.decode('utf-8').encode('utf-8', "surrogatepass").decode('utf-8') for f in filenames]
+    out_files = [f for f in out_files if f.endswith(".mp3")]
+    logging.debug(f"out_files: {out_files}")
+    return sorted(out_files)
+
+
+def get_album_art_path(album_path, audio):
+    logging.debug("0")
+    album_art = next((f for f in os.listdir(album_path) if f.lower().endswith('.jpg')), None)
+    logging.debug("1")
+    if album_art:
+        return album_art
+    # Look for the album art (APIC) frame
+    for tag in audio.values():
+        if isinstance(tag, APIC):
+            logging.debug("2")
+            album_art_data = tag.data
+            album_art_mime = tag.mime.split('/')[-1]  # Get the image file extension
+            hash_object = hashlib.sha256(album_art_data)
+            short_hash = hash_object.hexdigest()[:12]
+            logging.debug(short_hash)
+            album_art_filename = f'{short_hash}.{album_art_mime}'
+            album_art_filepath = os.path.join(TEMP_ALBUM_ART_FOLDER, album_art_filename)
+
+            # Save the album art as an image file
+            with open(album_art_filepath, 'wb') as img_file:
+                img_file.write(album_art_data)
+
+            logging.debug(f"Album art extracted to: {album_art_filepath}")
+            return album_art_filename
+    else:
+        return None
+
+
+def get_audio_file_info(audio):
+    if audio is not None:
+        # Extract artist and album, handle various file types by inspecting the tag names
+        if 'TPE2' in audio:  # For MP3 ID3 tags
+            artist = audio['TPE2'][0]
+        elif 'TPE1' in audio:  # For MP3 ID3 tags
+            artist = audio['TPE1'][0]
+        elif 'artist' in audio:
+            artist = audio['artist'][0]
+        else:
+            artist = 'Unknown Artist'
+
+        if 'TALB' in audio:  # For MP3 ID3 tags
+            # logging.debug(f"TALB: {audio['TALB']}")
+            # logging.debug(f"TALB: {audio['TALB'][0]}")
+            album = audio['TALB'][0]
+        elif 'album' in audio:
+            album = audio['album'][0]
+        else:
+            album = 'Unknown Album'
+        if "TDRC" in audio:
+            year = audio.get("TDRC")[0].year
+        elif "year" in audio:
+            year = audio.get('year')[0]
+        elif "date" in audio:
+            year = audio.get('date')[0]
+        else:
+            year = ''
+
+    else:
+        artist = 'Unknown Artist'
+        album = 'Unknown Album'
+        year = ""
+    return upper_first_word(artist), upper_first_word(album), year
+
+
+def upper_first_word(word):
+    return f"{word[0].upper()}{word[1:]}"
+
+
 def get_first_audio_file(directory):
     audio_extensions = ('.mp3', '.wav', '.ogg', '.flac', '.aac')
     audio_extensions = ['.mp3']
@@ -170,5 +189,6 @@ def get_first_audio_file(directory):
         return None
 
 
-if __name__ == '__main__':
-    app.run(debug=True, port=3000)  # Change port if needed
+
+
+

@@ -1,6 +1,6 @@
 from flask import Flask, send_from_directory
 from home import home_bp
-from api import api_bp
+from api import music_bp
 import os
 
 
@@ -14,7 +14,7 @@ MEDIA_FOLDER = os.path.join(os.path.dirname(__file__), '../media')
 
 # Register the Blueprints
 app.register_blueprint(home_bp, url_prefix='/')  # This will handle the homepage route
-app.register_blueprint(api_bp, url_prefix='/')   # This will handle the API routes
+app.register_blueprint(music_bp, url_prefix='/music')   # This will handle the API routes
 
 
 if __name__ == '__main__':

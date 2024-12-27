@@ -1,7 +1,7 @@
 from flask import Blueprint
 
 # Define the Blueprint for the API
-api_bp = Blueprint('api', __name__, url_prefix='/api')
+music_bp = Blueprint('music', __name__)
 
 # Import the routes related to the API
-from . import routes
+from . import music

@@ -28,7 +28,7 @@ def get_ip_location(ip):
                 return lat, lng, data["city"], data["country"]
     except Exception as e:
         print(f"<p>Error fetching IP location: {e}</p>")
-    return None, None
+    return None, None, None, None
 
 # Function to read and filter log lines from both current and older logs
 def read_log_file(log_file_path, buzzcocks_lines):
