@@ -8,6 +8,7 @@ from collections import defaultdict
 import json
 import hashlib
 from datetime import datetime as dt
+from pathlib import Path
 
 
 SITE_DOMAIN = "dev.fradgify.kozow.com"
@@ -90,6 +91,7 @@ def get_album_list():
                         }
                     )
         final_albums_dict = {"albums": album_list}
+        Path(ALBUMS_JSON_PATH).parent.mkdir(exist_ok=True, parents=True)
         with open(ALBUMS_JSON_PATH, "w") as final:
             json.dump(final_albums_dict, final)
         return jsonify({"success": f"{len(album_list)} albums written to albums.json at {dt.now()}"}, 200)
