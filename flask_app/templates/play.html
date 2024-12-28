@@ -1,3 +1,5 @@
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -5,3 +7,50 @@
     <link rel="stylesheet" href="/static/css/play.css">
     <script src="/static/js/howler.min.js"></script>
 </head>
+<body>
+    <div class="player-container">
+        <div id="artist-album-info">
+            <h2 id="artist-name"></h2>
+            <h2 id="album-name"></h2>
+        </div>
+        <!-- Single Album Art -->
+        <img id="album-art" src="" alt="Album Art" style="max-width: 85%; border-radius: 10px; margin-top: 10px; margin-bottom: 20px;">
+
+        <div class="controls">
+            <button onclick="previousTrack(albumTracks)" aria-label="Previous Track">
+                <img src="/static/icons/skip_previous_37dp_007BFF_FILL0_wght700_GRAD0_opsz40.svg" alt="Previous" width="30" height="30">
+            </button>
+            <button onclick="togglePlayPause()" aria-label="Play / Pause">
+                <img src="/static/icons/play_pause_37dp_007BFF_FILL0_wght700_GRAD0_opsz40.svg" id="play-pause-icon" alt="Play" width="36" height="36">
+                <span id="play-pause-text" style="display: none;">Play / Pause</span>
+            </button>
+            <button onclick="nextTrack(albumTracks)" aria-label="Next Track">
+                <img src="/static/icons/skip_next_37dp_007BFF_FILL0_wght700_GRAD0_opsz40.svg" alt="Next" width="30" height="30">
+            </button>
+        </div>
+
+        <!-- Track Info Display -->
+        <div id="track-info" style="margin-top: 10px; font-weight: bold;"></div>
+
+        <!-- Progress Bar -->
+        <div class="progress" id="progress-container" style="cursor: pointer;">
+            <div class="progress-bar">
+                <div id="progress"></div>
+            </div>
+        </div>
+
+        <!-- Volume Control -->
+        <div class="volume-control" style="margin-top: 15px;">
+            <img src="/static/icons/volume_down_37dp_007BFF_FILL0_wght700_GRAD0_opsz40.svg" alt="Mute" aria-hidden="true">
+            <input type="range" id="volume" min="0" max="1" step="0.01" value="1" onchange="setVolume(this.value)">
+            <img src="/static/icons/volume_up_37dp_007BFF_FILL0_wght700_GRAD0_opsz40.svg" alt="Max Volume" aria-hidden="true">
+        </div>
+
+        <!-- Track List -->
+        <h3>Track List</h3>
+        <ul id="track-list"></ul>
+    </div>
+
+    <script src="/static/js/album-player.js"></script>
+</body>
+</html>
