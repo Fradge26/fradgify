@@ -154,6 +154,7 @@ function nextTrack(albumTracks) {
 // Function to play the previous track
 function previousTrack(albumTracks) {
     console.log(currentTrack)
+    console.log(albumTracks.length)
     currentTrack = (currentTrack - 1 + albumTracks.length) % albumTracks.length; // Loop back to the start
     console.log(currentTrack)
     playTrack(currentTrack, albumTracks); // Load and play the next track
