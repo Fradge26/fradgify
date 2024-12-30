@@ -60,3 +60,6 @@ jobs:
         sudo cp /srv/fradgify/apache/dev.fradgify.kozow.com.conf /etc/apache2/sites-available/dev.fradgify.kozow.com.conf
         sudo a2ensite dev.fradgify.kozow.com.conf
         sudo systemctl reload apache2
+
+    - name: Update album list
+      run: curl -X GET https://dev.fradgify.kozow.com/music/album_list
