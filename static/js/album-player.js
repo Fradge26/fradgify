@@ -80,17 +80,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// player control listeners
-document.getElementById('playPauseButton').addEventListener('click', togglePlayPause);
-document.getElementById('previousTrackButton').addEventListener('click', function() {
-    // Pass the albumTracks array to the previousTrack function
-    previousTrack(albumTracks);
-});
-document.getElementById('nextTrackButton').addEventListener('click', function() {
-    // Pass the albumTracks array to the previousTrack function
-    nextTrack(albumTracks);
-});
-
 
 // Function to load and play a track
 function playTrack(index, albumTracks) {
@@ -287,4 +276,15 @@ function downloadTrack(track) {
     link.click();
     document.body.removeChild(link);
 }
+
+// player control listeners
+document.getElementById('playPauseButton').addEventListener('click', togglePlayPause);
+document.getElementById('previousTrackButton').addEventListener('click', function() {
+    // Pass the albumTracks array to the previousTrack function
+    previousTrack(albumTracks);
+});
+document.getElementById('nextTrackButton').addEventListener('click', function() {
+    // Pass the albumTracks array to the previousTrack function
+    nextTrack(albumTracks);
+});
 
