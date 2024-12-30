@@ -164,3 +164,8 @@ ul li:hover {
     margin-top: 10px;
     margin-bottom: 20px;
 }
+
+.now-playing {
+    margin-top: 10px;
+    font-weight: bold;
+}
