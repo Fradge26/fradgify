@@ -12,8 +12,8 @@ const trackListElement = document.getElementById('track-list');
 const trackInfoElement = document.getElementById('track-info');
 // const musicBaseFolder = "https://fradgify.kozow.com/media/music/complete";
 const musicBaseFolder = "/media/music/complete";
-const albumArtExtractFolder = "https://fradgify.kozow.com/album-player/album-art-extract";
-const defaultAlbumArt = "vinyl_cat.gif";
+const albumArtExtractFolder = "/static/album-art";
+const defaultAlbumArt = "default_album_art.jpg";
 
 // Function to fetch album data from the server with a dynamic folder path
 function fetchAlbumData(folderPath) {
