@@ -17,7 +17,7 @@ SITE_HOME = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fi
 MEDIA_DIR = os.path.join(SITE_HOME, "media")
 MUSIC_DIR = os.path.join(MEDIA_DIR, "music", "complete")
 ALBUMS_JSON_PATH = os.path.join(SITE_HOME, "static", "json", "albums.json")
-ALBUM_ART_REL_DIR = os.path.join("\\", "static", "album-art")
+ALBUM_ART_REL_DIR = os.path.join("/", "static", "album-art")
 ALBUM_ART_DIR = os.path.join(SITE_HOME, "static", "album-art")
 logging.debug(f"api started: {__file__}")
 
