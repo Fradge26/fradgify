@@ -39,16 +39,7 @@ function fetchAlbumData(folderPath) {
 
             const albumArt = data.albumArt;
             // Set the album art
-            albumArtElement.src = `${musicBaseFolder}/${folderPath}/${albumArt}`;
-            albumArtElement.onerror = function() {
-                console.log("trying: ", `${albumArtExtractFolder}/${albumArt}`)
-                this.src = `${albumArtExtractFolder}/${albumArt}`; // Use the default album art if the specified one fails to load
-                albumArtElement.onerror = function() {
-                    this.onerror = null; // Remove the error handler to prevent infinite loop
-                    console.log("trying: ", `${albumArtExtractFolder}/${defaultAlbumArt}`)
-                    this.src = `${albumArtExtractFolder}/${defaultAlbumArt}`; // Use the default album art if the specified one fails to load
-                };
-            };
+            albumArtElement.src = `${albumArt}`;
 
             renderTrackList();
             trackInfoElement.innerText = "Now playing:"

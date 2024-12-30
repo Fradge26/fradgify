@@ -1,28 +1,30 @@
 from . import music_bp
 import logging
 import os
-from flask import Flask, jsonify, send_from_directory, request, render_template
+from flask import jsonify, send_from_directory, request, render_template
 from mutagen import File
 from mutagen.id3 import ID3, APIC
-from collections import defaultdict
+from PIL import Image
 import json
 import hashlib
 from datetime import datetime as dt
 from pathlib import Path
+import io
 
 
 SITE_DOMAIN = "dev.fradgify.kozow.com"
-SERVER_SITE_HOME = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-MEDIA_DIR = os.path.join(SERVER_SITE_HOME, "media")
-MUSIC_FOLDER = os.path.join(MEDIA_DIR, "music", "complete")
-ALBUMS_JSON_PATH = os.path.join(SERVER_SITE_HOME, "static", "json", "albums.json")
-TEMP_ALBUM_ART_FOLDER = os.path.join(SERVER_SITE_HOME, "static", "album-art")
+SITE_HOME = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+MEDIA_DIR = os.path.join(SITE_HOME, "media")
+MUSIC_DIR = os.path.join(MEDIA_DIR, "music", "complete")
+ALBUMS_JSON_PATH = os.path.join(SITE_HOME, "static", "json", "albums.json")
+ALBUM_ART_REL_DIR = os.path.join("\\", "static", "album-art")
+ALBUM_ART_DIR = os.path.join(SITE_HOME, "static", "album-art")
 logging.debug(f"api started: {__file__}")
 
 
 @music_bp.route('/favicon.ico')
 def favicon():
-    return send_from_directory('static/icons', 'favicon.svg', type='image/svg+xml')
+    return send_from_directory('static/icons', 'favicon.ico', type='image/svg+xml')
 
 
 @music_bp.route('/browse')
@@ -42,7 +44,7 @@ def get_album():
     # Get the folder path from the query parameter
     logging.debug(f"api endpoint /album called")
     folder_path = request.args.get('path', default='', type=str)
-    album_path = os.path.join(MUSIC_FOLDER, folder_path)
+    album_path = os.path.join(MUSIC_DIR, folder_path)
 
     try:
         # List all MP3 files in the specified directory
@@ -69,7 +71,7 @@ def get_album_list():
         # album_dict = defaultdict(list)
         album_list = []
         # for folder in os.listdir(MUSIC_FOLDER):
-        for root_path, dirnames, filenames in os.walk(MUSIC_FOLDER):
+        for root_path, dirnames, filenames in os.walk(MUSIC_DIR):
             for dirname in dirnames:
                 current_dir = os.path.join(root_path, dirname)
                 # logging.debug(f"{current_dir=}")
@@ -79,7 +81,7 @@ def get_album_list():
                 if os.path.isdir(current_dir) and audio_file_path:
                     audio_file = File(audio_file_path)
                     artist, album, year = get_audio_file_info(audio_file)
-                    rel_path = os.path.relpath(current_dir, MUSIC_FOLDER)
+                    rel_path = os.path.relpath(current_dir, MUSIC_DIR)
                     # logging.debug(f"{artist=}, {album=}, {year=}, {rel_path=}")
                     # album_dict[artist].append([album, os.path.join(MUSIC_FOLDER, dirname)])
                     album_list.append(
@@ -110,31 +112,32 @@ def list_music_files(folder):
 
 
 def get_album_art_path(album_path, audio):
-    logging.debug("0")
-    album_art = next((f for f in os.listdir(album_path) if f.lower().endswith('.jpg')), None)
-    logging.debug("1")
-    if album_art:
-        return album_art
-    # Look for the album art (APIC) frame
+    hash_object = hashlib.sha256(album_path.encode('utf-8'))
+    short_hash = hash_object.hexdigest()[:12]
+    album_art_filename = short_hash + ".jpg"
+    album_art_filepath = os.path.join(ALBUM_ART_DIR, album_art_filename)
+    album_art_rel_filepath = os.path.join(ALBUM_ART_REL_DIR, album_art_filename)
+
+    if os.path.exists(album_art_filepath):
+        return album_art_rel_filepath
+    folder_img = next((f for f in os.listdir(album_path) if f.lower().endswith('.jpg')), None)
+    if folder_img:
+        with Image.open(os.path.join(album_path, folder_img)) as img:
+            img_resized = img.resize((400, 400))  # Example: Resize to 800x600
+            img_resized.save(album_art_filepath, "JPEG")
+        return album_art_rel_filepath
+
     for tag in audio.values():
         if isinstance(tag, APIC):
             logging.debug("2")
             album_art_data = tag.data
-            album_art_mime = tag.mime.split('/')[-1]  # Get the image file extension
-            hash_object = hashlib.sha256(album_art_data)
-            short_hash = hash_object.hexdigest()[:12]
-            logging.debug(short_hash)
-            album_art_filename = f'{short_hash}.{album_art_mime}'
-            album_art_filepath = os.path.join(TEMP_ALBUM_ART_FOLDER, album_art_filename)
-
-            # Save the album art as an image file
-            with open(album_art_filepath, 'wb') as img_file:
-                img_file.write(album_art_data)
-
+            image = Image.open(io.BytesIO(album_art_data))
+            image = image.convert("RGB")
+            image.save(album_art_filepath, "JPEG")
             logging.debug(f"Album art extracted to: {album_art_filepath}")
-            return album_art_filename
+            return album_art_rel_filepath
     else:
-        return None
+        return os.path.join(ALBUM_ART_REL_DIR, "default_album_art.jpg")
 
 
 def get_audio_file_info(audio):
