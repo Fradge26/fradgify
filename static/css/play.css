@@ -157,3 +157,10 @@ ul li:hover {
 .spin-animation {
     animation: spin 3s linear infinite;
 }
+
+.album-art {
+    max-width: 85%;
+    border-radius: 10px;
+    margin-top: 10px;
+    margin-bottom: 20px;
+}
