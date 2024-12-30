@@ -78,8 +78,38 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         console.error('No album path specified in the URL.');
     }
-});
 
+    // Get references to the buttons and set up event listeners
+    const previousTrackButton = document.querySelector('button[aria-label="Previous Track"]');
+    const playPauseButton = document.querySelector('button[aria-label="Play / Pause"]');
+    const nextTrackButton = document.querySelector('button[aria-label="Next Track"]');
+
+    // Ensure the elements exist before attaching event listeners
+    if (previousTrackButton) {
+        previousTrackButton.addEventListener('click', function () {
+            previousTrack(albumTracks);  // Assuming albumTracks is defined
+        });
+    } else {
+        console.error('Previous track button not found');
+    }
+
+
+    if (playPauseButton) {
+        playPauseButton.addEventListener('click', function () {
+            togglePlayPause();  // Implement this function for play/pause functionality
+        });
+    } else {
+        console.error('Play/Pause button not found');
+    }
+
+    if (nextTrackButton) {
+        nextTrackButton.addEventListener('click', function () {
+            nextTrack(albumTracks);  // Assuming nextTrack is defined
+        });
+    } else {
+        console.error('Next track button not found');
+    }
+});
 
 // Function to load and play a track
 function playTrack(index, albumTracks) {
