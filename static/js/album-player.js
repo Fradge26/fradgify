@@ -10,7 +10,6 @@ const albumNameElement = document.getElementById('album-name');
 const albumArtElement = document.getElementById('album-art');
 const trackListElement = document.getElementById('track-list');
 const trackInfoElement = document.getElementById('track-info');
-// const musicBaseFolder = "https://fradgify.kozow.com/media/music/complete";
 const musicBaseFolder = "/media/music/complete";
 const albumArtExtractFolder = "/static/album-art";
 const defaultAlbumArt = "default_album_art.jpg";
@@ -291,7 +290,7 @@ function renderTrackList() {
 
         // Append the list item to the track list
         trackListElement.appendChild(listItem);
-        console.log("END", listItem)
+        console.log(listItem)
     });
     console.log("Album tracks:", albumTracks);
 }

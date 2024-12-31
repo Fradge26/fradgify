@@ -1,0 +1,24 @@
+/* Body default styling */
+body {
+    margin: 0;
+    background-color: rgb(232, 250, 250);
+}
+
+/* Ensure SVG has no gaps */
+.top-image {
+    display: block;
+    margin: 0;
+}
+
+/* Consistent spacing for headings and links */
+.content {
+    margin-left: 1em; /* Uniform left margin for all content below */
+}
+h2 {
+    font-size: 1.5em;
+    margin: 1em 0 0.2em 0; /* Adjusted to work with .content margin */
+}
+a {
+    display: block;
+    margin: 0.2em 0; /* Spacing between links */
+}

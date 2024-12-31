@@ -32,9 +32,7 @@ def homepage():
 
 def get_latest(library, exts, num_files=10):
     directory_url = os.path.join(MEDIA_DIR, library.lower())
-    site_url = f"https://{SITE_DOMAIN}/media/{library.lower()}"
     folders = get_recent_folders(directory_url, exts, num_files)
-    print(MEDIA_DIR, library, folders)
     relative_paths = [os.path.relpath(folder, SERVER_SITE_HOME) for folder in folders]
     return relative_paths
 

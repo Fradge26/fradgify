@@ -46,6 +46,7 @@ jobs:
         sudo a2enmod headers
         sudo a2enmod cgi
         sudo a2enmod wsgi
+        sudo a2enmod http2
 
     - name: Deploy site files and chown static directory
       run: |
