@@ -107,7 +107,6 @@ def list_music_files(folder):
     filenames = os.listdir(folder.encode("utf-8"))
     out_files = [f.decode('utf-8').encode('utf-8', "surrogatepass").decode('utf-8') for f in filenames]
     out_files = [f for f in out_files if f.endswith(".mp3")]
-    out_files = [f.replace("_", " ") for f in out_files]
     logging.debug(f"out_files: {out_files}")
     return sorted(out_files)
 
