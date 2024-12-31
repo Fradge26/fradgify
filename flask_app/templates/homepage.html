@@ -14,15 +14,15 @@
     <!-- Content wrapper for consistent spacing -->
     <div class="content">
         <h2>Media Libraries</h2>
-        <a href="/media/movies">Movies</a><br>
-        <a href="/media/tv">TV</a><br>
-        <a href="/media/music">Music</a><br>
-        <a href="/media/sheets">Sheet Music</a><br>
+        <a href="/media/movies">Movies</a>
+        <a href="/media/tv">TV</a>
+        <a href="/media/music">Music</a>
+        <a href="/media/sheets">Sheet Music</a>
 
         {% for library, files in latest_files.items() %}
             <h2>Latest {{ library }}</h2>
             {% for file in files %}
-                <a href="{{ file }}">{{ file.split('/')[-1] }}</a><br>
+                <a href="{{ file }}">{{ file.split('/')[-1] }}</a>
             {% endfor %}
         {% endfor %}
 
