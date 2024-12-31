@@ -22,7 +22,11 @@
         {% for library, files in latest_files.items() %}
             <h2>Latest {{ library }}</h2>
             {% for file in files %}
-                <a href="{{ file }}">{{ file.split('/')[-1] }}</a>
+                {% if library == "Music" %}
+                    <a href="/music/play/?path={{ file[21:] }}">{{ file.split('/')[-1] }}</a>
+                {% else %}
+                    <a href="{{ file }}">{{ file.split('/')[-1] }}</a>
+                {% endif %}
             {% endfor %}
         {% endfor %}
 

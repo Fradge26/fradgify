@@ -26,8 +26,13 @@ def homepage():
     for library, exts in libraries.items():
         latest_files[library] = get_latest(library, exts)
 
+    normalized_latest_files = {
+        library: [file.replace(os.sep, '/') for file in files]
+        for library, files in latest_files.items()
+    }
+
     # Render the HTML template with the dynamic data
-    return render_template('homepage.html', latest_files=latest_files)
+    return render_template('homepage.html', latest_files=normalized_latest_files)
 
 
 def get_latest(library, exts, num_files=10):
