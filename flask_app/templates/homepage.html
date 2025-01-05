@@ -5,35 +5,90 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fradgify: Streaming you can trust!</title>
     <link rel="icon" href="{{ url_for('static', filename='icons/favicon.ico') }}" type="image/x-icon">
-    <link rel="stylesheet" href="/static/css/homepage.css">
+    <link rel="stylesheet" href="/static/css/homepage.min.css">
+    <script src="https://unpkg.com/htmx.org"></script>
 </head>
 <body>
-    <!-- SVG image with no gaps -->
-    <img class="top-image" src="{{ url_for('static', filename='images/fradgify_tight.svg') }}" alt="Fradgify Logo">
+    <!-- Navbar -->
+    <nav class="navbar is-dark" role="navigation" aria-label="main navigation">
+        <div class="navbar-brand">
+            <a class="navbar-item" href="/">
+                <img src="{{ url_for('static', filename='images/fradgify_tight.svg') }}" alt="Fradgify Logo" style="max-height: 3rem;">
+            </a>
+
+            <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+            </a>
+        </div>
+
+        <div id="navbarBasicExample" class="navbar-menu">
+            <div class="navbar-start">
+                <a class="navbar-item" href="/media/movies">Movies</a>
+                <a class="navbar-item" href="/media/tv">TV</a>
+                <a class="navbar-item" href="/media/music">Music</a>
+                <a class="navbar-item" href="/media/sheets">Sheet Music</a>
+            </div>
+
+            <div class="navbar-end">
+                <div class="navbar-item">
+                    <div class="buttons">
+                        <a class="button is-primary" href="/whereisluke">Where is Luke?</a>
+                        <a class="button is-light" href="/media/report" target="_blank">Traffic Dashboard</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
 
     <!-- Content wrapper for consistent spacing -->
-    <div class="content">
-        <h2>Media Libraries</h2>
-        <a href="/media/movies">Movies</a>
-        <a href="/media/tv">TV</a>
-        <a href="/media/music">Music</a>
-        <a href="/media/sheets">Sheet Music</a>
+    <div class="content mt-4 p-4">
+        <h2 class="title">Media Libraries</h2>
+
+        <div class="buttons">
+            <a class="button is-link" href="/media/movies">Movies</a>
+            <a class="button is-link" href="/media/tv">TV</a>
+            <a class="button is-link" href="/media/music">Music</a>
+            <a class="button is-link" href="/media/sheets">Sheet Music</a>
+        </div>
 
         {% for library, files in latest_files.items() %}
-            <h2>Latest {{ library }}</h2>
-            {% for file in files %}
-                {% if library == "Music" %}
-                    <a href="/music/play/?path={{ file[21:] }}">{{ file.split('/')[-1] }}</a>
-                {% else %}
-                    <a href="{{ file }}">{{ file.split('/')[-1] }}</a>
-                {% endif %}
-            {% endfor %}
+            <h2 class="title">Latest {{ library }}</h2>
+            <ul>
+                {% for file in files %}
+                    <li>
+                        {% if library == "Music" %}
+                            <a href="/music/play/?path={{ file[21:] }}">{{ file.split('/')[-1] }}</a>
+                        {% else %}
+                            <a href="{{ file }}">{{ file.split('/')[-1] }}</a>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
         {% endfor %}
 
-        <h2>Where is Luke?</h2>
-        <a href="/whereisluke">Find out</a>
+        <h2 class="title">Where is Luke?</h2>
+        <a class="button is-primary" href="/whereisluke">Find out</a>
 
-        <h4><a href="/media/report" target="_blank">Site Traffic Dashboard</a></h4>
+        <h4 class="subtitle mt-4">
+            <a href="/media/report" target="_blank">Site Traffic Dashboard</a>
+        </h4>
     </div>
+
+    <script>
+        // Add interactivity to the navbar burger menu for mobile views
+        document.addEventListener('DOMContentLoaded', () => {
+            const navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
+            navbarBurgers.forEach(el => {
+                el.addEventListener('click', () => {
+                    const target = el.dataset.target;
+                    const $target = document.getElementById(target);
+                    el.classList.toggle('is-active');
+                    $target.classList.toggle('is-active');
+                });
+            });
+        });
+    </script>
 </body>
 </html>

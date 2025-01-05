@@ -1,0 +1,109 @@
+// Define the primary color using Bulma's color palette
+$primary: hsl(286, 43%, 53%); // Set primary color as hsl(171, 100%, 41%)
+
+// If your SCSS file is in the 'scss/' folder, and Bulma is in 'node_modules/bulma/sass/'
+@use "../node_modules/bulma/sass/utilities/derived-variables" as dv with ($primary: hsl(286, 43%, 53%),);
+@use '../node_modules/bulma/sass' as bulma;
+
+// General body styling
+body {
+    margin: 0;
+    background: linear-gradient(135deg, #1e1e1e, #2a2a2a); // Darker gradient background
+    font-family: 'Arial', sans-serif;
+}
+
+// Styling for the SVG logo at the top
+.top-image {
+    display: block;
+    margin: 0 auto;
+    max-width: 100px;
+}
+
+// Content wrapper spacing and alignment
+.content {
+    margin: 2rem auto;
+    padding: 1rem;
+    max-width: 1200px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+// Headings for better visibility and aesthetics
+h2 {
+    font-size: 1.8em;
+    margin-bottom: 0.5rem;
+}
+
+h4.subtitle {
+    font-size: 1.2em;
+    color: $primary; // Use Bulma success color for subtitles (remains bright)
+}
+
+// Anchor link styling
+a {
+    color: $primary; // Bulma primary color for links
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+// Buttons customization
+.button.is-link {
+    background-color: $primary; // Bulma primary color for link buttons
+    border-color: $primary;
+    color: white;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.button.is-link:hover {
+    background-color: darken($primary, 10%); // Darken primary color by 10% on hover
+    border-color: darken($primary, 10%);
+}
+
+.button.is-primary {
+    color: white;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+    background-color: $primary; // Darken the info color by 10% on hover
+    border-color: $primary;
+}
+
+.button.is-primary:hover {
+    background-color: darken($primary, 10%); // Darken the info color by 10% on hover
+    border-color: darken($primary, 10%);
+}
+
+.button.is-light {
+    background-color: #4a4a4a; // Darker light button color for dark mode
+    border-color: #5a5a5a;
+    color: #e0e0e0; // Light gray for better contrast
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.button.is-light:hover {
+    background-color: darken(#636363, 10%); // Darken the color on hover by 10%
+}
+
+// Navbar specific tweaks
+.navbar {
+    background-color: #1c1c1c; // Dark background for navbar
+    border-bottom: 1px solid #3a3a3a; // Darker border at the bottom
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.navbar-item img {
+    max-height: 48px; // Adjust logo size in navbar
+}
+
+// Lists in the latest files section
+ul {
+    padding: 0;
+    list-style-type: none;
+}
+
+ul li {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #3a3a3a; // Darker list items
+}
+
+ul li:last-child {
+    border-bottom: none;
+}
