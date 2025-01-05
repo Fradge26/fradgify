@@ -75,20 +75,6 @@
             <a href="/media/report" target="_blank">Site Traffic Dashboard</a>
         </h4>
     </div>
-
-    <script>
-        // Add interactivity to the navbar burger menu for mobile views
-        document.addEventListener('DOMContentLoaded', () => {
-            const navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
-            navbarBurgers.forEach(el => {
-                el.addEventListener('click', () => {
-                    const target = el.dataset.target;
-                    const $target = document.getElementById(target);
-                    el.classList.toggle('is-active');
-                    $target.classList.toggle('is-active');
-                });
-            });
-        });
-    </script>
+    <script src='/static/js/custom-navbar.js'></script>
 </body>
 </html>
