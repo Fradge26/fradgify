@@ -17,7 +17,16 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="navbar-start">
                 <a class="navbar-item" href="/media/movies">Movies</a>
                 <a class="navbar-item" href="/media/tv">TV</a>
-                <a class="navbar-item" href="/media/music">Music</a>
+
+                <!-- Music dropdown with sub-options -->
+                <div class="navbar-item has-dropdown is-hoverable">
+                    <a class="navbar-link" href="/media/music">Music</a>
+                    <div class="navbar-dropdown">
+                        <a class="navbar-item" href="/music/search">Search</a>
+                        <a class="navbar-item" href="/media/music/complete">Directory</a>
+                    </div>
+                </div>
+
                 <a class="navbar-item" href="/media/sheets">Sheet Music</a>
             </div>
             <div class="navbar-end">
