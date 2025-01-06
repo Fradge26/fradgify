@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="/static/css/search.css">
     <script src="/static/js/jquery-3.7.1.min.js"></script>
     <script src="/static/js/dataTables.min.js"></script>
+    <script src="{{ url_for('static', filename='js/add-navbar.js') }}"></script>
 </head>
 <body>
     <h1>Album Browser</h1>
@@ -27,5 +28,6 @@
     </table>
 
     <script src="{{ url_for('static', filename='js/album-browser.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/custom-navbar.js') }}"></script>
 </body>
 </html>

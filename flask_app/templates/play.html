@@ -6,6 +6,7 @@
     <title>Fradgify Album Player</title>
     <link rel="stylesheet" href="/static/css/play.css">
     <script src="/static/js/howler.min.js"></script>
+    <script src="{{ url_for('static', filename='js/add-navbar.js') }}"></script>
 </head>
 <body>
     <div class="player-container">
@@ -52,5 +53,6 @@
     </div>
 
     <script src="/static/js/album-player.js"></script>
+    <script src="{{ url_for('static', filename='js/custom-navbar.js') }}"></script>
 </body>
 </html>
