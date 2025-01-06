@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
     navbar.innerHTML = `
         <div class="navbar-brand">
             <a class="navbar-item" href="/">
-                <img src="/static/images/fradgify_tight.svg" alt="Fradgify Logo" style="max-height: 3rem;">
+                <img src="/static/images/fradgify_tight.svg" alt="Fradgify Logo" class="logo-height">
             </a>
             <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
                 <span aria-hidden="true"></span>
