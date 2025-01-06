@@ -6,41 +6,11 @@
     <title>Fradgify: Streaming you can trust!</title>
     <link rel="icon" href="{{ url_for('static', filename='icons/favicon.ico') }}" type="image/x-icon">
     <link rel="stylesheet" href="/static/css/homepage.min.css">
+    <script src="{{ url_for('static', filename='js/add-navbar.js') }}"></script>
     <script src="https://unpkg.com/htmx.org"></script>
 </head>
 <body>
-    <!-- Navbar -->
-    <nav class="navbar is-dark" role="navigation" aria-label="main navigation">
-        <div class="navbar-brand">
-            <a class="navbar-item" href="/">
-                <img src="{{ url_for('static', filename='images/fradgify_tight.svg') }}" alt="Fradgify Logo" style="max-height: 3rem;">
-            </a>
-
-            <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
-                <span aria-hidden="true"></span>
-                <span aria-hidden="true"></span>
-                <span aria-hidden="true"></span>
-            </a>
-        </div>
-
-        <div id="navbarBasicExample" class="navbar-menu">
-            <div class="navbar-start">
-                <a class="navbar-item" href="/media/movies">Movies</a>
-                <a class="navbar-item" href="/media/tv">TV</a>
-                <a class="navbar-item" href="/media/music">Music</a>
-                <a class="navbar-item" href="/media/sheets">Sheet Music</a>
-            </div>
-
-            <div class="navbar-end">
-                <div class="navbar-item">
-                    <div class="buttons">
-                        <a class="button is-primary" href="/whereisluke">Where is Luke?</a>
-                        <a class="button is-light" href="/media/report" target="_blank">Traffic Dashboard</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </nav>
+    <!-- Navbar added by js -->
 
     <!-- Content wrapper for consistent spacing -->
     <div class="content mt-4 p-4">
