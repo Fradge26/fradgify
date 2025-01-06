@@ -111,3 +111,32 @@ ul li:last-child {
 .logo-height {
     max-height: 3rem;
 }
+
+/* Ensure dropdown menu has curved corners */
+.dropdown-menu {
+    border-radius: 8px; /* Adjust as needed for roundness */
+    overflow: hidden; /* Ensures children stay within rounded corners */
+    background-color: #fff; /* Set a consistent background color */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Add some subtle shadow */
+    border: 1px solid #ddd; /* Optional: Add a border */
+}
+
+/* Remove white box padding or margins */
+.dropdown-content {
+    padding: 0; /* Removes any extra padding */
+    margin: 0; /* Ensures no unintended spacing */
+}
+
+/* Style individual dropdown items */
+.dropdown-item {
+    padding: 8px 16px; /* Consistent spacing */
+    background-color: transparent; /* Inherit the parent background */
+    color: #333; /* Text color */
+}
+
+.dropdown-item:hover {
+    background-color: #f0f0f0; /* Highlight on hover */
+    color: #000; /* Ensure good contrast */
+}
+
+

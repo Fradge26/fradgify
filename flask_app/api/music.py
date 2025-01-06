@@ -27,9 +27,9 @@ def favicon():
     return send_from_directory('static/icons', 'favicon.ico', type='image/svg+xml')
 
 
-@music_bp.route('/browse')
+@music_bp.route('/search')
 def browse():
-    return render_template('browse.html')
+    return render_template('search.html')
 
 
 @music_bp.route('/play/')
