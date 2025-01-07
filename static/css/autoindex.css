@@ -32,7 +32,7 @@ a:hover {
 
 /* Wrap text within <pre> tags */
 pre {
-    white-space: normal; /* Allow line wrapping */
+    white-space: pre-wrap; /* Allow line wrapping */
     word-wrap: break-word; /* Break long words if necessary */
 }
 
@@ -46,4 +46,16 @@ pre {
         font-size: 12px;
     }
 }
+
+pre a {
+    display: block; /* Make each link start on a new line */
+    text-decoration: none; /* Optional: Remove underlines for links */
+    color: inherit; /* Optional: Maintain text color */
+}
+
+pre img {
+    vertical-align: middle; /* Align icons with text */
+    margin-right: 8px; /* Add spacing between icons and text */
+}
+
 
