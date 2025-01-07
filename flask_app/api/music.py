@@ -124,7 +124,8 @@ def get_album_art_path(album_path, audio):
     if folder_img:
         with Image.open(os.path.join(album_path, folder_img)) as img:
             img_resized = img.resize((400, 400))  # Example: Resize to 800x600
-            img_resized.save(album_art_filepath, "JPEG")
+            img_rgb = img_resized.convert('RGB')
+            img_rgb.save(album_art_filepath, "JPEG")
         return album_art_rel_filepath
 
     for tag in audio.values():
