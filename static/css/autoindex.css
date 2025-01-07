@@ -30,32 +30,33 @@ a:hover {
     text-decoration: underline;
 }
 
-/* Wrap text within <pre> tags */
 pre {
-    white-space: pre-wrap; /* Allow line wrapping */
+    white-space: pre-wrap; /* Allow wrapping while preserving newlines */
     word-wrap: break-word; /* Break long words if necessary */
 }
 
-/* Adjust font size and layout for smaller screens */
-@media (max-width: 600px) {
-    body {
-        font-size: 14px; /* Reduce font size for better readability */
-    }
-
-    pre {
-        font-size: 12px;
-    }
+pre a, pre img {
+    display: inline-block; /* Keep items inline while allowing wrapping */
+    vertical-align: middle; /* Align icons and text */
+    margin-right: 8px; /* Add spacing between columns */
 }
 
 pre a {
-    display: block; /* Make each link start on a new line */
     text-decoration: none; /* Optional: Remove underlines for links */
-    color: inherit; /* Optional: Maintain text color */
+    color: inherit; /* Optional: Maintain default text color */
 }
 
-pre img {
-    vertical-align: middle; /* Align icons with text */
-    margin-right: 8px; /* Add spacing between icons and text */
+pre hr {
+    border: none;
+    border-top: 1px solid #ccc; /* Style the horizontal rule */
+    margin: 8px 0; /* Add spacing above and below */
 }
+
+@media (max-width: 600px) {
+    pre {
+        font-size: 12px; /* Adjust font size for small screens */
+    }
+}
+
 
 
