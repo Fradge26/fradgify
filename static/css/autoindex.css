@@ -31,9 +31,3 @@ a {
 .navbar a {
     text-decoration: none !important;
 }
-
-hr {
-    border: none;
-    height: 2px;
-    background-color: var(--primary); /* Use Bulma primary variable */
-}
