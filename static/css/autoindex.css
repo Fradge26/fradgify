@@ -26,6 +26,12 @@ a {
     text-decoration: none;
 }
 
-a:hover {
-    text-decoration: underline;
+/* Underline on hover for all links except those in the navbar */
+:not(.navbar) a:hover {
+    text-decoration: underline; /* Underline only on hover */
+}
+
+/* Exclude links inside the navbar from any hover underline */
+.navbar a {
+    text-decoration: none !important;
 }
