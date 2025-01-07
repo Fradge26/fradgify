@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 <!-- Music dropdown with sub-options -->
                 <div class="navbar-item has-dropdown is-hoverable">
-                    <a class="navbar-link" href="/media/music">Music</a>
+                    <a class="navbar-link" href="/media/music/complete">Music</a>
                     <div class="navbar-dropdown">
                         <a class="navbar-item" href="/music/search">Search</a>
                         <a class="navbar-item" href="/media/music/complete">Directory</a>
