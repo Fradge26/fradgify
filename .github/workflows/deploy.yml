@@ -64,4 +64,4 @@ jobs:
         sudo systemctl reload apache2
 
     - name: Update album list
-      run: curl -X GET https://dev.fradgify.kozow.com/music/album_list
+      run: curl -X GET --http1.1 https://dev.fradgify.kozow.com/music/album_list
