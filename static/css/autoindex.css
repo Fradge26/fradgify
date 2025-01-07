@@ -29,3 +29,21 @@ a {
 a:hover {
     text-decoration: underline;
 }
+
+/* Wrap text within <pre> tags */
+pre {
+    white-space: normal; /* Allow line wrapping */
+    word-wrap: break-word; /* Break long words if necessary */
+}
+
+/* Adjust font size and layout for smaller screens */
+@media (max-width: 600px) {
+    body {
+        font-size: 14px; /* Reduce font size for better readability */
+    }
+
+    pre {
+        font-size: 12px;
+    }
+}
+
