@@ -17,10 +17,6 @@ table th, table td {
     word-wrap: break-word;
 }
 
-table th {
-    background-color: #f4f4f4;
-}
-
 a {
     word-wrap: break-word;
     text-decoration: none;
@@ -34,4 +30,10 @@ a {
 /* Exclude links inside the navbar from any hover underline */
 .navbar a {
     text-decoration: none !important;
+}
+
+hr {
+    border: none;
+    height: 2px;
+    background-color: var(--primary); /* Use Bulma primary variable */
 }
