@@ -11,10 +11,11 @@
 
     <!-- Leaflet CSS and JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <link rel="stylesheet" href="/static/css/homepage.min.css">
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="{{ url_for('static', filename='js/add-navbar.js') }}"></script>
 </head>
 <body>
-    <img src="{{ url_for('static', filename='images/fradgify_tight.svg') }}" alt="Description of the image" style="max-width: 100%; height: auto;">
     <h1>Where is Luke???</h1>
 
     {% if decoded_filename %}
@@ -41,5 +42,6 @@
     {% else %}
         <p>{{ error }}</p>
     {% endif %}
+    <script src="{{ url_for('static', filename='js/custom-navbar.js') }}"></script>
 </body>
 </html>
