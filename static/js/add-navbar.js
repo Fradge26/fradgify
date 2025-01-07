@@ -33,7 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <div class="navbar-item">
                     <div class="buttons">
                         <a class="button is-primary" href="/whereisluke">Where is Luke?</a>
-                        <a class="button is-light" href="/media/report" target="_blank">Traffic Dashboard</a>
+                        <a class="button is-light" href="/report" target="_blank">Traffic Dashboard</a>
                     </div>
                 </div>
             </div>

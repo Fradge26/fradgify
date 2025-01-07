@@ -35,6 +35,11 @@ def homepage():
     return render_template('homepage.html', latest_files=normalized_latest_files)
 
 
+@home_bp.route('/report')
+def report():
+    return render_template('report.html')
+
+
 def get_latest(library, exts, num_files=10):
     directory_url = os.path.join(MEDIA_DIR, library.lower())
     folders = get_recent_folders(directory_url, exts, num_files)
