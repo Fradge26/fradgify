@@ -29,34 +29,3 @@ a {
 a:hover {
     text-decoration: underline;
 }
-
-pre {
-    white-space: pre-wrap; /* Allow wrapping while preserving newlines */
-    word-wrap: break-word; /* Break long words if necessary */
-}
-
-pre a, pre img {
-    display: inline-block; /* Keep items inline while allowing wrapping */
-    vertical-align: middle; /* Align icons and text */
-    margin-right: 8px; /* Add spacing between columns */
-}
-
-pre a {
-    text-decoration: none; /* Optional: Remove underlines for links */
-    color: inherit; /* Optional: Maintain default text color */
-}
-
-pre hr {
-    border: none;
-    border-top: 1px solid #ccc; /* Style the horizontal rule */
-    margin: 8px 0; /* Add spacing above and below */
-}
-
-@media (max-width: 600px) {
-    pre {
-        font-size: 12px; /* Adjust font size for small screens */
-    }
-}
-
-
-
