@@ -315,11 +315,16 @@ window.__onGCastApiAvailable = function(isAvailable) {
 };
 
 function initializeCastContext() {
-    console.log("Initializing Cast Context...");
-    cast.framework.CastContext.getInstance().setOptions({
-        receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
-        autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED,
-    });
+    // Ensure that cast is defined before trying to use it
+    if (typeof cast !== 'undefined') {
+        console.log("Initializing Cast Context...");
+        cast.framework.CastContext.getInstance().setOptions({
+            receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
+            autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED,
+        });
+    } else {
+        console.error("Cast API is not properly initialized.");
+    }
 }
 
 // Cast audio to Chromecast
