@@ -316,6 +316,7 @@ window.__onGCastApiAvailable = function(isAvailable) {
 
 function initializeCastContext() {
     // Ensure that cast is defined before trying to use it
+    console.log(cast);
     if (typeof cast !== 'undefined') {
         console.log("Initializing Cast Context...");
         cast.framework.CastContext.getInstance().setOptions({
