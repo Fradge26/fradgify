@@ -303,3 +303,38 @@ function downloadTrack(track) {
     link.click();
     document.body.removeChild(link);
 }
+
+// Initialize Cast framework
+window['__onGCastApiAvailable'] = function (isAvailable) {
+    if (isAvailable) {
+        initializeCast();
+    }
+};
+
+function initializeCast() {
+    cast.framework.CastContext.getInstance().setOptions({
+        receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
+        autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED,
+    });
+}
+
+// Cast audio to Chromecast
+function castAudio() {
+    const castSession = cast.framework.CastContext.getInstance().getCurrentSession();
+
+    if (castSession) {
+        const mediaInfo = new chrome.cast.media.MediaInfo(sound._src, 'audio/mp3');
+        const request = new chrome.cast.media.LoadRequest(mediaInfo);
+
+        castSession.loadMedia(request).then(
+            () => console.log('Cast started!'),
+            (errorCode) => console.error('Error starting cast:', errorCode)
+        );
+    } else {
+        console.error('No cast session available!');
+    }
+}
+
+// Bind cast button to castAudio function
+document.getElementById('cast-button').addEventListener('click', castAudio);
+

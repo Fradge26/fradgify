@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="/static/css/play.css">
     <script src="{{ url_for('static', filename='js/add-navbar.js') }}"></script>
     <script src="/static/js/howler.min.js"></script>
+    <script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
 </head>
 <body>
     <div class="player-container">
@@ -19,6 +20,9 @@
         <img id="album-art" src="" alt="Album Art" class="album-art">
 
         <div class="controls">
+            <button id="cast-button" aria-label="Cast Audio">
+                <img src="/static/icons/cast_37dp_007BFF_FILL0_wght700_GRAD0_opsz40.svg" alt="Cast">
+            </button>
             <button aria-label="Previous Track">
                 <img src="/static/icons/skip_previous_37dp_007BFF_FILL0_wght700_GRAD0_opsz40.svg" alt="Previous">
             </button>
