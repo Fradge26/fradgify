@@ -1,6 +1,22 @@
 // Define the primary color using Bulma's color palette
 $primary: hsl(286, 43%, 53%); // Set primary color as hsl(171, 100%, 41%)
 
+// Define dark theme colors
+$background: hsl(0, 0%, 15%); // Dark background
+$grey-dark: hsl(0, 0%, 90%); // Light text color
+$grey-light: hsl(0, 0%, 25%); // Subtle dark accents
+
+// Apply colors to Bulma variables
+$body-background-color: $background;
+$navbar-background-color: $background;
+$navbar-item-color: $grey-dark;
+$button-color: $grey-dark;
+$button-background-color: $grey-light;
+
+// Other dark-specific customizations
+$pre-background: $background; // Pre background for always dark
+$pre-color: $grey-dark;       // Pre text color
+
 // If your SCSS file is in the 'scss/' folder, and Bulma is in 'node_modules/bulma/sass/'
 @use "../node_modules/bulma/sass/utilities/derived-variables" as dv with ($primary: hsl(286, 43%, 53%),);
 @use '../node_modules/bulma/sass' as bulma;
