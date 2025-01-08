@@ -1,6 +1,4 @@
 $(document).ready(function () {
-    const musicBaseFolder = "https://fradgify.kozow.com/media/music/complete";
-    
     // Function to fetch artist and album data
     function fetchAlbumData() {
         $.getJSON('/static/json/albums.json', function(data) {

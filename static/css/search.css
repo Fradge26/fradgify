@@ -1,9 +1,15 @@
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f9;
-    color: #333;
-    margin: 20px;
+
+
+#albums_wrapper {
+    padding: 20px;
+    box-sizing: border-box; /* Ensures padding does not affect overall width/height */
 }
+
+h1 {
+    padding-top: 20px;
+    padding-left: 20px;
+}
+
 
 table {
     width: 100%;
