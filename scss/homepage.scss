@@ -163,7 +163,7 @@ hr {
 }
 
 pre {
-    background-color: var(--bulma-pre, #1e1e1e); // Default to dark background
+    background-color: $background; // Default to dark background
 }
 
 
