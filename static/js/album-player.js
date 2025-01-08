@@ -304,15 +304,18 @@ function downloadTrack(track) {
     document.body.removeChild(link);
 }
 
-// Initialize Cast framework
-window['__onGCastApiAvailable'] = function (isAvailable) {
+// Initialize Cast framework when the API is available
+window.__onGCastApiAvailable = function(isAvailable) {
     if (isAvailable) {
-        initializeCast();
+        console.log("Cast API is available.");
+        initializeCastContext();
+    } else {
+        console.error('Cast API is not available.');
     }
 };
 
-function initializeCast() {
-    console.log("we got here")
+function initializeCastContext() {
+    console.log("Initializing Cast Context...");
     cast.framework.CastContext.getInstance().setOptions({
         receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
         autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED,
@@ -338,4 +341,3 @@ function castAudio() {
 
 // Bind cast button to castAudio function
 document.getElementById('cast-button').addEventListener('click', castAudio);
-
