@@ -146,4 +146,10 @@ hr {
     background-color: $primary; /* Use Bulma primary variable */
 }
 
+pre {
+    background-color: var(--bulma-pre-background, #1e1e1e); // Default to dark background
+}
+
+
+
 
