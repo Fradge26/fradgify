@@ -304,38 +304,21 @@ function downloadTrack(track) {
     document.body.removeChild(link);
 }
 
-// Initialize Cast framework when the API is available
-window.__onGCastApiAvailable = function(isAvailable) {
-    if (isAvailable) {
-        console.log("Cast API is available.");
-        initializeCastContext();
-    } else {
-        console.error('Cast API is not available.');
-    }
-};
-
-function initializeCastContext() {
-    // Ensure that cast is defined before trying to use it
-    console.log(cast);
-    if (typeof cast !== 'undefined') {
-        console.log("Initializing Cast Context...");
-        cast.framework.CastContext.getInstance().setOptions({
-            receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
-            autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED,
-        });
-    } else {
-        console.error("Cast API is not properly initialized.");
-    }
-}
-
 // Cast audio to Chromecast
 function castAudio() {
     const castSession = cast.framework.CastContext.getInstance().getCurrentSession();
 
     if (castSession) {
-        const mediaInfo = new chrome.cast.media.MediaInfo(sound._src, 'audio/mp3');
+        // Get the URL of the Howler audio
+        const audioUrl = sound._src;
+
+        // Create MediaInfo object
+        const mediaInfo = new chrome.cast.media.MediaInfo(audioUrl, 'audio/mp3');
+
+        // Create LoadRequest with MediaInfo
         const request = new chrome.cast.media.LoadRequest(mediaInfo);
 
+        // Start casting the audio to the current Chromecast session
         castSession.loadMedia(request).then(
             () => console.log('Cast started!'),
             (errorCode) => console.error('Error starting cast:', errorCode)
