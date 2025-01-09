@@ -304,6 +304,30 @@ function downloadTrack(track) {
     document.body.removeChild(link);
 }
 
+// Initialize Cast framework when the API is available
+window.__onGCastApiAvailable = function(isAvailable) {
+    if (isAvailable) {
+        console.log("Cast API is available.");
+        initializeCastContext();
+    } else {
+        console.error('Cast API is not available.');
+    }
+};
+
+function initializeCastContext() {
+    // Ensure that cast is defined before trying to use it
+    console.log(cast);
+    if (typeof cast !== 'undefined') {
+        console.log("Initializing Cast Context...");
+        cast.framework.CastContext.getInstance().setOptions({
+            receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
+            autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED,
+        });
+    } else {
+        console.error("Cast API is not properly initialized.");
+    }
+}
+
 // Cast audio to Chromecast
 function castAudio() {
     const castSession = cast.framework.CastContext.getInstance().getCurrentSession();
