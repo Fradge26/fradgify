@@ -183,3 +183,15 @@ ul li:hover {
     padding: 1rem;
 }
 
+/* Adjust the size of the Cast button */
+google-cast-launcher {
+    width: 40px;
+    height: 40px;
+    background-size: contain;
+    display: inline-block;
+    cursor: pointer; /* Add a pointer cursor on hover */
+}
+
+
+
+
