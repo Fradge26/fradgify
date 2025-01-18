@@ -22,7 +22,7 @@ jobs:
       run: |
         if [ ! -d "/srv/fradgify/.git" ]; then
           # Clone the repo if it doesn't exist
-          git clone https://github.com/Fradge26/fradgify.git /srv/fradgify
+          sudo git clone https://github.com/Fradge26/fradgify.git /srv/fradgify
         fi
         # Add /srv/fradgify as a safe directory for Git
         git config --global --add safe.directory /srv/fradgify
