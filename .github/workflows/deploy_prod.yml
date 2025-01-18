@@ -53,7 +53,8 @@ jobs:
         sudo mkdir -p /var/www/fradgify.kozow.com/flask_app
         sudo mkdir -p /var/www/fradgify.kozow.com/static
         sudo rsync -av --delete /srv/fradgify/flask_app/ /var/www/fradgify.kozow.com/flask_app/
-        sudo rsync -av --exclude 'album-art/' /srv/fradgify/static/ /var/www/fradgify.kozow.com/static/
+        sudo rsync -av --delete --exclude 'album-art/' /srv/fradgify/static/ /var/www/fradgify.kozow.com/static/
+        sudo rsync -av /srv/fradgify/static/album-art/ /var/www/fradgify.kozow.com/static/album-art/
         sudo cp /srv/fradgify/apache/flask_app_prod.wsgi /var/www/fradgify.kozow.com/flask_app/flask_app_prod.wsgi
         sudo chown -R www-data:www-data /var/www/fradgify.kozow.com/static
 
