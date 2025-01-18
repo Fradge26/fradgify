@@ -1,0 +1,67 @@
+name: Deploy to Fradgify Prod Server
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: [self-hosted, prod-runner]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+    
+    - name: apt install
+      run: |
+        sudo apt update
+        sudo apt install -y apache2 libapache2-mod-wsgi-py3 git python3.10-venv
+
+    - name: Clone repository if not present, or pull if already cloned
+      run: |
+        if [ ! -d "/srv/fradgify/.git" ]; then
+          # Clone the repo if it doesn't exist
+          git clone https://github.com/Fradge26/fradgify.git /srv/fradgify
+        fi
+        # Add /srv/fradgify as a safe directory for Git
+        git config --global --add safe.directory /srv/fradgify
+        # Navigate to the directory
+        cd /srv/fradgify
+        # Pull the latest changes from the master branch
+        git pull origin master
+
+    - name: Set up Python environment
+      run: |
+        cd /srv/fradgify
+        python3 -m venv venv
+        source venv/bin/activate
+        pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Enable Apache mods
+      run: |
+        sudo a2enmod rewrite
+        sudo a2enmod ssl
+        sudo a2enmod headers
+        sudo a2enmod cgi
+        sudo a2enmod wsgi
+        sudo a2enmod http2
+
+    - name: Deploy site files and chown static directory
+      run: |
+        sudo mkdir -p /var/www/fradgify.kozow.com/flask_app
+        sudo mkdir -p /var/www/fradgify.kozow.com/static
+        sudo rsync -av --delete /srv/fradgify/flask_app/ /var/www/fradgify.kozow.com/flask_app/
+        sudo rsync -av --exclude 'album-art/' /srv/fradgify/static/ /var/www/fradgify.kozow.com/static/
+        sudo cp /srv/fradgify/apache/flask_app.wsgi /var/www/fradgify.kozow.com/flask_app/flask_app.wsgi
+        sudo chown -R www-data:www-data /var/www/fradgify.kozow.com/static
+
+    - name: Load Apache conf
+      run: |
+        sudo cp /srv/fradgify/apache/fradgify.kozow.com.conf /etc/apache2/sites-available/fradgify.kozow.com.conf
+        sudo a2ensite fradgify.kozow.com.conf
+        sudo systemctl reload apache2
+
+    - name: Update album list
+      run: curl -X GET --http1.1 https://fradgify.kozow.com/music/album_list

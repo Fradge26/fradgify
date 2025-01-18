@@ -1,9 +1,7 @@
 $(document).ready(function () {
-    const musicBaseFolder = "https://fradgify.kozow.com/media/music/complete";
-    
     // Function to fetch artist and album data
     function fetchAlbumData() {
-        $.getJSON('albums.json', function(data) {
+        $.getJSON('/static/json/albums.json', function(data) {
             const tableData = [];
 
             // Loop through artists and albums
@@ -14,7 +12,7 @@ $(document).ready(function () {
                     album.year,
                     album.path,
                     `<button class="play-button" data-path="${album.path}" aria-label="Play Album">
-                        <img src="../icons/play_circle_37dp_007BFF_FILL0_wght700_GRAD0_opsz40.svg" alt="Play" width="24" height="24">
+                        <img src="/static/icons/play_circle_37dp_007BFF_FILL0_wght700_GRAD0_opsz40.svg" alt="Play" width="24" height="24">
                     </button>`
                 ]);
         
@@ -48,6 +46,6 @@ $(document).ready(function () {
         // Call your function to play the album here
         const encodedPath = encodeURIComponent(folderPath);
         console.log(encodedPath)
-        window.location.href = `/album-player/play/?path=${encodedPath}`;
+        window.location.href = `/music/play/?path=${encodedPath}`;
     });
 });

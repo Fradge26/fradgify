@@ -1,0 +1,33 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+table th, table td {
+    text-align: left;
+    padding: 10px;
+    word-wrap: break-word;
+}
+
+a {
+    word-wrap: break-word;
+    text-decoration: none;
+}
+
+/* Underline on hover for all links except those in the navbar */
+:not(.navbar) a:hover {
+    text-decoration: underline; /* Underline only on hover */
+}
+
+/* Exclude links inside the navbar from any hover underline */
+.navbar a {
+    text-decoration: none !important;
+}

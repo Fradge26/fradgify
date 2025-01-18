@@ -10,13 +10,13 @@ const albumNameElement = document.getElementById('album-name');
 const albumArtElement = document.getElementById('album-art');
 const trackListElement = document.getElementById('track-list');
 const trackInfoElement = document.getElementById('track-info');
-const musicBaseFolder = "https://fradgify.kozow.com/media/music/complete"
-const albumArtExtractFolder = "https://fradgify.kozow.com/album-player/album-art-extract"
-const defaultAlbumArt = "vinyl_cat.gif"
+const musicBaseFolder = "/media/music/complete";
+const albumArtExtractFolder = "/static/album-art";
+const defaultAlbumArt = "default_album_art.jpg";
 
 // Function to fetch album data from the server with a dynamic folder path
 function fetchAlbumData(folderPath) {
-    fetch(`/api/album?path=${encodeURIComponent(folderPath)}`)
+    fetch(`/music/album/?path=${encodeURIComponent(folderPath)}`)
         .then(response => response.json())
         .then(data => {
             albumTracks = data.musicFiles.map(file => {
@@ -38,16 +38,7 @@ function fetchAlbumData(folderPath) {
 
             const albumArt = data.albumArt;
             // Set the album art
-            albumArtElement.src = `${musicBaseFolder}/${folderPath}/${albumArt}`;
-            albumArtElement.onerror = function() {
-                console.log("trying: ", `${albumArtExtractFolder}/${albumArt}`)
-                this.src = `${albumArtExtractFolder}/${albumArt}`; // Use the default album art if the specified one fails to load
-                albumArtElement.onerror = function() {
-                    this.onerror = null; // Remove the error handler to prevent infinite loop
-                    console.log("trying: ", `${albumArtExtractFolder}/${defaultAlbumArt}`)
-                    this.src = `${albumArtExtractFolder}/${defaultAlbumArt}`; // Use the default album art if the specified one fails to load
-                };
-            };
+            albumArtElement.src = `${albumArt}`;
 
             renderTrackList();
             trackInfoElement.innerText = "Now playing:"
@@ -77,8 +68,45 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         console.error('No album path specified in the URL.');
     }
-});
 
+    // Get references to the buttons and set up event listeners
+    const previousTrackButton = document.querySelector('button[aria-label="Previous Track"]');
+    const playPauseButton = document.querySelector('button[aria-label="Play / Pause"]');
+    const nextTrackButton = document.querySelector('button[aria-label="Next Track"]');
+
+    // Ensure the elements exist before attaching event listeners
+    if (previousTrackButton) {
+        previousTrackButton.addEventListener('click', function () {
+            previousTrack(albumTracks);  // Assuming albumTracks is defined
+        });
+    } else {
+        console.error('Previous track button not found');
+    }
+
+    if (playPauseButton) {
+        playPauseButton.addEventListener('click', function () {
+            togglePlayPause();  // Implement this function for play/pause functionality
+        });
+    } else {
+        console.error('Play/Pause button not found');
+    }
+
+    if (nextTrackButton) {
+        nextTrackButton.addEventListener('click', function () {
+            nextTrack(albumTracks);  // Assuming nextTrack is defined
+        });
+    } else {
+        console.error('Next track button not found');
+    }
+
+    // volume slide on change
+    const volumeSlider = document.getElementById('volume');
+    if (volumeSlider) {
+        volumeSlider.addEventListener('change', (event) => {
+            setVolume(event.target.value);
+        });
+    }
+});
 
 // Function to load and play a track
 function playTrack(index, albumTracks) {
@@ -122,7 +150,7 @@ function nextTrack(albumTracks) {
 
 // Function to play the previous track
 function previousTrack(albumTracks) {
-    currentTrack = (currentTrack - 1) % albumTracks.length; // Loop back to the start
+    currentTrack = (currentTrack - 1 + albumTracks.length) % albumTracks.length; // Loop back to the start
     playTrack(currentTrack, albumTracks); // Load and play the next track
 }
 
@@ -238,7 +266,7 @@ function renderTrackList() {
 
         // Create the play button
         const playButton = document.createElement('button');
-        playButton.innerHTML = '<img src="../icons/play_arrow_37dp_007BFF_FILL0_wght400_GRAD0_opsz40.svg" alt="Play" width="24" height="24">';
+        playButton.innerHTML = '<img src="/static/icons/play_arrow_37dp_007BFF_FILL0_wght400_GRAD0_opsz40.svg" alt="Play" width="24" height="24">';
         playButton.onclick = () => playTrack(index, albumTracks); // Play the clicked track
         playButton.style.padding = '2px';
         playButton.style.width = '30px';
@@ -246,7 +274,7 @@ function renderTrackList() {
 
         // Create the download button
         const downloadButton = document.createElement('button');
-        downloadButton.innerHTML = '<img src="../icons/download_37dp_007BFF_FILL0_wght400_GRAD0_opsz40.svg" alt="Download" width="24" height="24">';
+        downloadButton.innerHTML = '<img src="/static/icons/download_37dp_007BFF_FILL0_wght400_GRAD0_opsz40.svg" alt="Download" width="24" height="24">';
         downloadButton.onclick = () => downloadTrack(track); // Function to download the track
         downloadButton.style.padding = '2px';
         downloadButton.style.width = '30px';
@@ -262,13 +290,7 @@ function renderTrackList() {
 
         // Append the list item to the track list
         trackListElement.appendChild(listItem);
-
-
-
-
-
-        console.log("END", listItem)
-        
+        console.log(listItem)
     });
     console.log("Album tracks:", albumTracks);
 }
@@ -282,3 +304,53 @@ function downloadTrack(track) {
     document.body.removeChild(link);
 }
 
+// Initialize Cast framework when the API is available
+window.__onGCastApiAvailable = function(isAvailable) {
+    if (isAvailable) {
+        console.log("Cast API is available.");
+        initializeCastContext();
+    } else {
+        console.error('Cast API is not available.');
+    }
+};
+
+function initializeCastContext() {
+    // Ensure that cast is defined before trying to use it
+    console.log(cast);
+    if (typeof cast !== 'undefined') {
+        console.log("Initializing Cast Context...");
+        cast.framework.CastContext.getInstance().setOptions({
+            receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
+            autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED,
+        });
+    } else {
+        console.error("Cast API is not properly initialized.");
+    }
+}
+
+// Cast audio to Chromecast
+function castAudio() {
+    const castSession = cast.framework.CastContext.getInstance().getCurrentSession();
+
+    if (castSession) {
+        // Get the URL of the Howler audio
+        const audioUrl = sound._src;
+
+        // Create MediaInfo object
+        const mediaInfo = new chrome.cast.media.MediaInfo(audioUrl, 'audio/mp3');
+
+        // Create LoadRequest with MediaInfo
+        const request = new chrome.cast.media.LoadRequest(mediaInfo);
+
+        // Start casting the audio to the current Chromecast session
+        castSession.loadMedia(request).then(
+            () => console.log('Cast started!'),
+            (errorCode) => console.error('Error starting cast:', errorCode)
+        );
+    } else {
+        console.error('No cast session available!');
+    }
+}
+
+// Bind cast button to castAudio function
+document.getElementById('cast-button').addEventListener('click', castAudio);
