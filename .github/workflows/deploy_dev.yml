@@ -54,7 +54,7 @@ jobs:
         sudo mkdir -p /var/www/dev.fradgify.kozow.com/static
         sudo rsync -av --delete /srv/fradgify/flask_app/ /var/www/dev.fradgify.kozow.com/flask_app/
         sudo rsync -av --exclude 'album-art/' /srv/fradgify/static/ /var/www/dev.fradgify.kozow.com/static/
-        sudo cp /srv/fradgify/apache/flask_app.wsgi /var/www/dev.fradgify.kozow.com/flask_app/flask_app.wsgi
+        sudo cp /srv/fradgify/apache/flask_app_dev.wsgi /var/www/dev.fradgify.kozow.com/flask_app/flask_app_dev.wsgi
         sudo chown -R www-data:www-data /var/www/dev.fradgify.kozow.com/static
 
     - name: Load Apache conf
