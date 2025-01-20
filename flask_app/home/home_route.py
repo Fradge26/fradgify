@@ -50,23 +50,20 @@ def get_latest(library, exts, num_files=10):
 def list_video_folders(directory, exts):
     video_files = []
     top_level_dir = os.path.basename(os.path.normpath(directory))
-    print("SERVER_SITE_HOME", SERVER_SITE_HOME)
-    print("top_level_dir", top_level_dir)
     for dirpath, dirnames, filenames in os.walk(os.path.join(SERVER_SITE_HOME, directory)):
         if os.path.basename(dirpath) == top_level_dir:
             continue
         for entry in filenames:
             if entry.lower().endswith(tuple(exts)):
                 full_path = os.path.join(dirpath, entry)
-                folder = str(Path(full_path).parent)
-                if folder not in video_files:
+                folder = str(Path(full_path).parent.as_posix())
+                if folder not in video_files and "media/music/downloading" not in folder:
                     video_files.append(folder)
     return video_files
 
 
 def get_recent_folders(directory, exts, num_files=10):
     out_files = []
-    print("directory", directory)
     video_folder = list_video_folders(directory, exts)
     sorted_folders = sorted(video_folder, key=lambda x: os.path.getmtime(os.path.join(directory, x)), reverse=True)
     for file in sorted_folders[:num_files]:
