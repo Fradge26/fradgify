@@ -40,11 +40,7 @@
             <ul>
                 {% for file in files %}
                     <li>
-                        {% if library == "Music" %}
-                            <a href="/music/play/?path={{ file[21:] }}">{{ file.split('/')[-1] }}</a>
-                        {% else %}
-                            <a href="{{ file }}">{{ file.split('/')[-1] }}</a>
-                        {% endif %}
+                        <a href="{{ file['href'] }}">{{ file['text'] }}</a>
                     </li>
                 {% endfor %}
             </ul>
