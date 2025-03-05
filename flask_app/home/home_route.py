@@ -1,4 +1,4 @@
-from flask import render_template, current_app
+from flask import render_template
 from . import home_bp
 import os
 from pathlib import Path
@@ -45,7 +45,6 @@ def homepage():
                         "href": f"{quote(file.replace(os.sep, '/'), safe='/')}"
                     }
                 )
-    current_app.logger.debug(f"{normalized_latest_files}")
     # Render the HTML template with the dynamic data
     return render_template('homepage.html', latest_files=normalized_latest_files)
 
