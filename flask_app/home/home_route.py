@@ -45,7 +45,7 @@ def homepage():
                         "href": f"{quote(file.replace(os.sep, '/'), safe='/')}"
                     }
                 )
-
+    print(normalized_latest_files)
     # Render the HTML template with the dynamic data
     return render_template('homepage.html', latest_files=normalized_latest_files)
 
