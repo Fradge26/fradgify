@@ -7,7 +7,8 @@ import os
 app = Flask(
     __name__,
     static_folder='../static',
-    template_folder='templates')
+    template_folder='templates'
+)
 
 # Define a relative path to the media directory
 MEDIA_FOLDER = os.path.join(os.path.dirname(__file__), '../media')
