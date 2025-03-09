@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline';">
     <title>Fradgify Album Player</title>
     <link rel="stylesheet" href="/static/css/homepage.min.css">
     <link rel="stylesheet" href="/static/css/play.css">
     <script src="{{ url_for('static', filename='js/add-navbar.js') }}"></script>
     <script src="/static/js/howler.min.js"></script>
-    <script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"></script>
+    <script src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1" async></script>
 </head>
 <body>
     <div class="player-container">
