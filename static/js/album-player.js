@@ -319,10 +319,12 @@ function initializeCastContext() {
     console.log(cast);
     if (typeof cast !== 'undefined') {
         console.log("Initializing Cast Context...");
+        console.log('Cast framework:', window.cast.framework);
         cast.framework.CastContext.getInstance().setOptions({
             receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
             autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED,
         });
+        console.log('Cast framework:', window.cast.framework);
     } else {
         console.error("Cast API is not properly initialized.");
     }
