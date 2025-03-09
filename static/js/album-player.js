@@ -332,27 +332,36 @@ function initializeCastContext() {
 
 // Cast audio to Chromecast
 function castAudio() {
-    const castSession = cast.framework.CastContext.getInstance().getCurrentSession();
+    console.log('Sound object:', sound);
 
-    if (castSession) {
-        // Get the URL of the Howler audio
-        const audioUrl = sound._src;
-
-        // Create MediaInfo object
-        const mediaInfo = new chrome.cast.media.MediaInfo(audioUrl, 'audio/mp3');
-
-        // Create LoadRequest with MediaInfo
-        const request = new chrome.cast.media.LoadRequest(mediaInfo);
-
-        // Start casting the audio to the current Chromecast session
-        castSession.loadMedia(request).then(
-            () => console.log('Cast started!'),
-            (errorCode) => console.error('Error starting cast:', errorCode)
-        );
-    } else {
-        console.error('No cast session available!');
+    if (!sound) {
+        console.error('Sound object is not defined!');
+        return;
     }
+
+    console.log('Sound._src:', sound._src);
+
+    if (!sound._src) {
+        console.error('Sound._src is not set!');
+        return;
+    }
+
+    const audioUrl = sound._src;
+
+    const castSession = cast.framework.CastContext.getInstance().getCurrentSession();
+    if (!castSession) {
+        console.error('No cast session available!');
+        return;
+    }
+
+    const mediaInfo = new chrome.cast.media.MediaInfo(audioUrl, 'audio/mp3');
+    const request = new chrome.cast.media.LoadRequest(mediaInfo);
+
+    castSession.loadMedia(request)
+        .then(() => console.log('Media loaded successfully'))
+        .catch((error) => console.error('Failed to load media:', error));
 }
+
 
 // Bind cast button to castAudio function
 document.getElementById('cast-button').addEventListener('click', castAudio);
