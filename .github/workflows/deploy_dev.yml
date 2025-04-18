@@ -7,7 +7,7 @@ on:
 
 jobs:
   deploy:
-    runs-on: self-hosted
+    runs-on: [self-hosted, dev-runner]
 
     steps:
     - name: Checkout code
@@ -47,6 +47,7 @@ jobs:
         sudo a2enmod cgi
         sudo a2enmod wsgi
         sudo a2enmod http2
+        sudo a2enmod remoteip
 
     - name: Deploy site files and chown static directory
       run: |
@@ -54,7 +55,7 @@ jobs:
         sudo mkdir -p /var/www/dev.fradgify.kozow.com/static
         sudo rsync -av --delete /srv/fradgify/flask_app/ /var/www/dev.fradgify.kozow.com/flask_app/
         sudo rsync -av --delete --exclude 'album-art/' /srv/fradgify/static/ /var/www/dev.fradgify.kozow.com/static/
-        sudo rsync -av /srv/fradgify/static/album-art/ /var/www/fradgify.kozow.com/static/album-art/
+        sudo rsync -av /srv/fradgify/static/album-art/ /var/www/dev.fradgify.kozow.com/static/album-art/
         sudo cp /srv/fradgify/apache/flask_app_dev.wsgi /var/www/dev.fradgify.kozow.com/flask_app/flask_app_dev.wsgi
         sudo chown -R www-data:www-data /var/www/dev.fradgify.kozow.com/static
 
