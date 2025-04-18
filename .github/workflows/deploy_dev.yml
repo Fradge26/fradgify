@@ -47,6 +47,7 @@ jobs:
         sudo a2enmod cgi
         sudo a2enmod wsgi
         sudo a2enmod http2
+        sudo a2enmod remoteip
 
     - name: Deploy site files and chown static directory
       run: |
