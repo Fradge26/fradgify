@@ -11,6 +11,7 @@
     <script src="{{ url_for('static', filename='js/add-navbar.js') }}"></script>
 </head>
 <body>
+    <div class="content mt-4 p-4">
     <h2 class="title">Where is Luke???</h2>
 
     {% if decoded_filename %}
@@ -42,7 +43,7 @@
     {% else %}
         <p>{{ error }}</p>
     {% endif %}
-
+    </div>
     <script src="{{ url_for('static', filename='js/custom-navbar.js') }}"></script>
 </body>
 </html>
