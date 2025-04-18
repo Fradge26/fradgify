@@ -14,13 +14,20 @@
     <h1>Where is Luke???</h1>
 
     {% if decoded_filename %}
-        <p><strong>Last seen watching:</strong> {{ decoded_filename }}</p>
-        <p><strong>On:</strong> {{ time }}</p>
-        <p><strong>From IP Address:</strong> {{ ip_address }}</p>
+        <ul>
+            <li><strong>Last seen watching:</strong> {{ decoded_filename }}</li>
+            <li><strong>On:</strong> {{ time }}</li>
+            <li><strong>From IP Address:</strong> {{ ip_address }}</li>
+
+            {% if lat and lng %}
+                <li><strong>Located at:</strong> {{ lat }}, {{ lng }} (lat, long)</li>
+                <li><strong>In:</strong> {{ city }}, {{ country }}</li>
+            {% else %}
+                <li>Could not find geolocation for the IP address.</li>
+            {% endif %}
+        </ul>
 
         {% if lat and lng %}
-            <p><strong>Located at: </strong>{{ lat }}, {{ lng }} (lat, long)</p>
-            <p><strong>In: </strong>{{ city }}, {{ country }}</p>
             <div id="map" style="height: 600px;"></div>
             <script>
                 var map = L.map('map').setView([{{ lat }}, {{ lng }}], 5);
@@ -31,12 +38,11 @@
                 var marker = L.marker([{{ lat }}, {{ lng }}]).addTo(map);
                 marker.bindPopup("<b>IP Location</b><br>Lat: {{ lat }}<br>Lng: {{ lng }}").openPopup();
             </script>
-        {% else %}
-            <p>Could not find geolocation for the IP address.</p>
         {% endif %}
     {% else %}
         <p>{{ error }}</p>
     {% endif %}
+
     <script src="{{ url_for('static', filename='js/custom-navbar.js') }}"></script>
 </body>
 </html>
