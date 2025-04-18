@@ -21,15 +21,15 @@ jobs:
     - name: Clone repository if not present, or pull if already cloned
       run: |
         if [ ! -d "/srv/fradgify/.git" ]; then
-          # Clone the repo if it doesn't exist
           sudo git clone https://github.com/Fradge26/fradgify.git /srv/fradgify
         fi
-        # Add /srv/fradgify as a safe directory for Git
+        
         git config --global --add safe.directory /srv/fradgify
-        # Navigate to the directory
         cd /srv/fradgify
-        # Pull the latest changes from the master branch
-        git pull origin master
+        
+        # Discard any local changes and force sync with remote
+        git fetch origin
+        git reset --hard origin/master
 
     - name: Set up Python environment
       run: |
