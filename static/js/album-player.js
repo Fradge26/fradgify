@@ -41,7 +41,7 @@ function fetchAlbumData(folderPath) {
             albumArtElement.src = `${albumArt}`;
 
             renderTrackList();
-            trackInfoElement.innerText = "Now playing:"
+            trackInfoElement.innerText = "Now Playing:"
         })
         .catch(error => console.error('Error fetching album data:', error));
 }
