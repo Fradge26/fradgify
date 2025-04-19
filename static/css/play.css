@@ -134,9 +134,9 @@ ul {
 
 ul li {
     cursor: pointer;
-    padding: 10px;
+    padding: 5px;
     background-color: #f4f4f9;
-    margin-bottom: 5px;
+    margin-bottom: 2px;
     border: 1px solid #ddd;
     border-radius: 5px;
     color: black;
@@ -160,10 +160,10 @@ ul li:hover {
 }
 
 .album-art {
-    max-width: 85%;
+    max-width: 90%;
     border-radius: 10px;
     margin-top: 10px;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
 }
 
 .now-playing {
@@ -181,7 +181,8 @@ ul li:hover {
 
 /* Push the music player below the navbar */
 .player-container {
-    margin-top: 1rem; /* Adjust based on the navbar's height */
+    margin-top: 0.5rem; /* Adjust based on the navbar's height */
+    margin-bottom: 0.5rem;
     padding: 1rem;
 }
 
