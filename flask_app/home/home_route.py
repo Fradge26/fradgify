@@ -1,8 +1,8 @@
-from flask import render_template
+from flask import Response, render_template
 from . import home_bp
 import os
 from pathlib import Path
-from urllib.parse import quote
+from urllib.parse import quote_from_bytes
 from collections import defaultdict
 
 
@@ -11,8 +11,8 @@ MEDIA_DIR = os.path.join(SERVER_SITE_HOME, "media")
 SITE_DOMAIN = "dev.fradgify.kozow.com"
 CWD_DIR = os.getcwd()
 VIDEO_EXT = {'.mp4', '.avi', '.mov', '.mkv', '.wmv', '.flv', '.webm', '.mpeg', '.mpg'}
-AUDIO_EXT = {".mp3", ".flac"}
-SHEET_EXT = ".pdf"
+AUDIO_EXT = {".mp3"}
+SHEET_EXT = {".pdf"}
 
 
 @home_bp.route('/')
@@ -31,27 +31,42 @@ def homepage():
     normalized_latest_files = defaultdict(list)
     for library, files in latest_files.items():
         for file in files:
+            filename = file.replace(os.sep, '/').split('/')[-1]
             if library == "Music":
-                normalized_latest_files[library].append(
-                    {
-                        "text": file.replace(os.sep, '/').split('/')[-1],
-                        "href": f"/music/play/?path={quote(file[21:].replace(os.sep, '/'), safe='/')}"
-                    }
-                )
+                href_path = quote_apache(file[21:])
+                normalized_latest_files[library].append({
+                    "text": filename,
+                    "href": f"/music/play/?path={href_path}"
+                })
             else:
-                normalized_latest_files[library].append(
-                    {
-                        "text": file.replace(os.sep, '/').split('/')[-1],
-                        "href": f"{quote(file.replace(os.sep, '/'), safe='/')}"
-                    }
-                )
-    # Render the HTML template with the dynamic data
-    return render_template('homepage.html', latest_files=normalized_latest_files)
+                href_path = quote_apache(file)
+                normalized_latest_files[library].append({
+                    "text": filename,
+                    "href": href_path
+                })
+
+    # Render template to a string
+    html_content = render_template('homepage.html', latest_files=normalized_latest_files)
+
+    # Return a Response safely encoding surrogates
+    return Response(html_content.encode('utf-8', 'surrogateescape'), mimetype='text/html')
 
 
 @home_bp.route('/report')
 def report():
     return render_template('report.html')
+
+def quote_apache(path: str) -> str:
+    """
+    Quote a filesystem path so that it matches Apache autoindex hrefs.
+    Handles surrogate pairs and arbitrary byte sequences.
+    """
+    # Step 1: Convert to the raw filesystem bytes representation
+    # This ensures we get the same byte values Apache uses
+    path_bytes = os.fsencode(path.replace(os.sep, '/'))
+
+    # Step 2: Percent-encode all non-ASCII bytes, leaving '/' safe
+    return quote_from_bytes(path_bytes, safe=b'/')
 
 
 def get_latest(library, exts, num_files=10):
