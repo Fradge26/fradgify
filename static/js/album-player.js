@@ -261,17 +261,19 @@ function initializeCastContext() {
     }
 }
 
-function castAudio() {
-    if (sound) sound.pause();
+function castAudio(trackIndex = currentTrack) {
+    const track = albumTracks[trackIndex];
 
-    if (!sound || !sound._src) {
-        console.error('Sound object or _src is not available!');
+    if (!track || !track.file) {
+        console.error('Track data missing!', track);
         return;
     }
 
-    const audioUrl = sound._src;
-    const castSession = cast.framework.CastContext.getInstance().getCurrentSession();
+    // Stop local playback
+    if (sound) sound.pause();
 
+    const audioUrl = track.file;
+    const castSession = cast.framework.CastContext.getInstance().getCurrentSession();
     if (!castSession) {
         console.error('No cast session available!');
         return;
@@ -281,30 +283,27 @@ function castAudio() {
     const request = new chrome.cast.media.LoadRequest(mediaInfo);
 
     castSession.loadMedia(request)
-        .then(() => console.log('Media load request sent'))
-        .catch(err => console.error('Failed to load media:', err));
+        .then(() => {
+            console.log('Media loaded successfully on Cast:', track.name);
+            trackInfoElement.innerText = 'Now Playing: ' + track.name;
 
-    // Poll until the media session exists
-    const checkMedia = setInterval(() => {
-        const media = castSession.getMediaSession();
-        if (media) {
-            clearInterval(checkMedia);
+            // Get media session for updates
+            const media = castSession.getMediaSession();
+            if (!media) return;
 
-            console.log('Media session ready on cast!');
+            // When track finishes, play the next one
             media.addUpdateListener(() => {
-                const playerState = media.playerState;
-                console.log('Cast player state:', playerState);
-
-                if (playerState === chrome.cast.media.PlayerState.IDLE &&
+                if (media.playerState === chrome.cast.media.PlayerState.IDLE &&
                     media.idleReason === chrome.cast.media.IdleReason.FINISHED) {
-                    console.log('Track finished on Cast — advancing...');
-                    nextTrack(albumTracks, true);
-                    setTimeout(() => castAudio(), 500);
+
+                    currentTrack = (currentTrack + 1) % albumTracks.length;
+                    castAudio(currentTrack); // Pass new index explicitly
                 }
             });
-        }
-    }, 200); // check every 200ms
+        })
+        .catch(err => console.error('Failed to load media:', err));
 }
+
 
 
 
