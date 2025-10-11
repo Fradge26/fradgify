@@ -286,7 +286,6 @@ function castAudio() {
 
             // Listen for media status updates
             media.addUpdateListener((isAlive) => {
-                if (!isAlive) return; // Skip null/ended states
 
                 const playerState = media.playerState;
                 console.log('Cast player state:', playerState);
@@ -298,6 +297,9 @@ function castAudio() {
                     console.log('Track finished on Cast — advancing...');
                     nextTrack(albumTracks); // Move to next track
                     setTimeout(() => castAudio(), 500); // Cast next track with slight delay
+                }
+                if (!isAlive) {
+                    console.log('Media session ended');
                 }
             });
         })
