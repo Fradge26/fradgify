@@ -67,7 +67,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const castSession = cast.framework.CastContext.getInstance().getCurrentSession();
             const media = castSession.getMediaSession(); // the loaded media
-            media.seek(percentage * sound.duration(), successCallback, errorCallback);
+            media.seek(
+                percentage * sound.duration(),
+                () => console.log('Playback started on cast device ✅'), // successCallback
+                (err) => console.error('Failed to start playback ❌', err) // errorCallback);
+            );
         });
     }
 
