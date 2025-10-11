@@ -275,37 +275,26 @@ function castAudio() {
     const request = new chrome.cast.media.LoadRequest(mediaInfo);
 
     castSession.loadMedia(request)
-        .then(() => {
+        .then((newMedia) => {
             console.log('Media loaded successfully');
 
-            // Re-fetch the active media session AFTER loading
-            const media = castSession.getMediaSession();
-
-            if (!media) {
-                console.error('No media session available on cast!');
-                return;
-            }
-
-            media.addUpdateListener((isAlive) => {
-                const playerState = media.playerState;
+            // newMedia is the actual Media object for this session
+            newMedia.addUpdateListener((isAlive) => {
+                const playerState = newMedia.playerState;
                 console.log('Cast player state:', playerState, 'isAlive:', isAlive);
 
-                // Only move to next track when playback finished normally
                 if (
                     playerState === chrome.cast.media.PlayerState.IDLE &&
-                    media.idleReason === chrome.cast.media.IdleReason.FINISHED
+                    newMedia.idleReason === chrome.cast.media.IdleReason.FINISHED
                 ) {
                     console.log('Track finished on Cast — advancing...');
                     nextTrack(albumTracks);
-                    setTimeout(() => castAudio(), 800); // Small delay before loading next
-                }
-
-                if (!isAlive) {
-                    console.log('Media session ended');
+                    setTimeout(() => castAudio(), 500);
                 }
             });
         })
         .catch((error) => console.error('Failed to load media:', error));
+
 }
 
 
