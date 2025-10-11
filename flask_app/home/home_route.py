@@ -1,4 +1,4 @@
-from flask import render_template
+from flask import Response, render_template
 from . import home_bp
 import os
 from pathlib import Path
@@ -31,22 +31,25 @@ def homepage():
     normalized_latest_files = defaultdict(list)
     for library, files in latest_files.items():
         for file in files:
+            filename = file.replace(os.sep, '/').split('/')[-1]
             if library == "Music":
-                normalized_latest_files[library].append(
-                    {
-                        "text": file.replace(os.sep, '/').split('/')[-1],
-                        "href": f"/music/play/?path={quote_apache(file[21:])}"
-                    }
-                )
+                href_path = quote_apache(file[21:])
+                normalized_latest_files[library].append({
+                    "text": filename,
+                    "href": f"/music/play/?path={href_path}"
+                })
             else:
-                normalized_latest_files[library].append(
-                    {
-                        "text": file.replace(os.sep, '/').split('/')[-1],
-                        "href": f"{quote_apache(file)}"
-                    }
-                )
-    # Render the HTML template with the dynamic data
-    return render_template('homepage.html', latest_files=normalized_latest_files)
+                href_path = quote_apache(file)
+                normalized_latest_files[library].append({
+                    "text": filename,
+                    "href": href_path
+                })
+
+    # Render template to a string
+    html_content = render_template('homepage.html', latest_files=normalized_latest_files)
+
+    # Return a Response safely encoding surrogates
+    return Response(html_content.encode('utf-8', 'surrogateescape'), mimetype='text/html')
 
 
 @home_bp.route('/report')
