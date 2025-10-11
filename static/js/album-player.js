@@ -263,7 +263,7 @@ function initializeCastContext() {
 
 function castAudio(trackIndex = currentTrack) {
     const track = albumTracks[trackIndex];
-
+    console.log(trackIndex)
     if (!track || !track.file) {
         console.error('Track data missing!', track);
         return;
