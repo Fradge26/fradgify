@@ -2,7 +2,7 @@ from flask import render_template
 from . import home_bp
 import os
 from pathlib import Path
-from urllib.parse import quote
+from urllib.parse import quote, quote_from_bytes
 from collections import defaultdict
 
 
@@ -35,14 +35,14 @@ def homepage():
                 normalized_latest_files[library].append(
                     {
                         "text": file.replace(os.sep, '/').split('/')[-1],
-                        "href": f"/music/play/?path={quote(file[21:].replace(os.sep, '/'), safe='/')}"
+                        "href": f"/music/play/?path={quote_apache(file[21:])}"
                     }
                 )
             else:
                 normalized_latest_files[library].append(
                     {
                         "text": file.replace(os.sep, '/').split('/')[-1],
-                        "href": f"{quote(file.replace(os.sep, '/'), safe='/')}"
+                        "href": f"{quote_apache(file)}"
                     }
                 )
     # Render the HTML template with the dynamic data
@@ -52,6 +52,18 @@ def homepage():
 @home_bp.route('/report')
 def report():
     return render_template('report.html')
+
+def quote_apache(path: str) -> str:
+    """
+    Quote a filesystem path so that it matches Apache autoindex hrefs.
+    Handles surrogate pairs and arbitrary byte sequences.
+    """
+    # Step 1: Convert to the raw filesystem bytes representation
+    # This ensures we get the same byte values Apache uses
+    path_bytes = os.fsencode(path.replace(os.sep, '/'))
+
+    # Step 2: Percent-encode all non-ASCII bytes, leaving '/' safe
+    return quote_from_bytes(path_bytes, safe=b'/')
 
 
 def get_latest(library, exts, num_files=10):
