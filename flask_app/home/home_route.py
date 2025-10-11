@@ -2,7 +2,7 @@ from flask import Response, render_template
 from . import home_bp
 import os
 from pathlib import Path
-from urllib.parse import quote, quote_from_bytes
+from urllib.parse import quote_from_bytes
 from collections import defaultdict
 
 
@@ -11,8 +11,8 @@ MEDIA_DIR = os.path.join(SERVER_SITE_HOME, "media")
 SITE_DOMAIN = "dev.fradgify.kozow.com"
 CWD_DIR = os.getcwd()
 VIDEO_EXT = {'.mp4', '.avi', '.mov', '.mkv', '.wmv', '.flv', '.webm', '.mpeg', '.mpg'}
-AUDIO_EXT = {".mp3", ".flac"}
-SHEET_EXT = ".pdf"
+AUDIO_EXT = {".mp3"}
+SHEET_EXT = {".pdf"}
 
 
 @home_bp.route('/')
