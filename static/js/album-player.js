@@ -64,6 +64,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const offsetX = event.clientX - rect.left;
             const percentage = offsetX / rect.width;
             sound.seek(percentage * sound.duration());
+
+            const castSession = cast.framework.CastContext.getInstance().getCurrentSession();
+            const media = castSession.getMediaSession(); // the loaded media
+            media.seek(percentage * sound.duration(), successCallback, errorCallback);
         });
     }
 
@@ -89,6 +93,11 @@ function playTrack(index, tracks) {
     isPlaying = true;
 
     progressInterval = setInterval(updateProgress, 100);
+
+    const castSession = cast.framework.CastContext.getInstance().getCurrentSession();
+    const media = castSession.getMediaSession(); // the loaded media
+    // Play
+    media.play(null, successCallback, errorCallback);
 }
 
 // Next/previous tracks
@@ -108,6 +117,11 @@ function pauseTrack() {
     sound.pause();
     clearInterval(progressInterval);
     isPlaying = false;
+
+    const castSession = cast.framework.CastContext.getInstance().getCurrentSession();
+    const media = castSession.getMediaSession(); // the loaded media
+    // Pause
+    media.pause(null, successCallback, errorCallback);
 }
 
 // Toggle play/pause
@@ -219,6 +233,9 @@ function initializeCastContext() {
 }
 
 function castAudio() {
+    if (sound) {
+        sound.pause(); // stop local playback
+    }
     if (!sound || !sound._src) {
         console.error('Sound object or _src is not available!');
         return;
