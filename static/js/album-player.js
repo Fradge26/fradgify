@@ -171,10 +171,16 @@ function renderTrackList() {
         const playButton = document.createElement('button');
         playButton.innerHTML = '<img src="/static/icons/play_arrow_37dp_007BFF_FILL0_wght400_GRAD0_opsz40.svg" alt="Play" width="24" height="24">';
         playButton.onclick = () => playTrack(index, albumTracks);
+        playButton.style.padding = '2px';
+        playButton.style.width = '30px';
+        playButton.style.height = '30px';
 
         const downloadButton = document.createElement('button');
         downloadButton.innerHTML = '<img src="/static/icons/download_37dp_007BFF_FILL0_wght400_GRAD0_opsz40.svg" alt="Download" width="24" height="24">';
         downloadButton.onclick = () => downloadTrack(track);
+        downloadButton.style.padding = '2px';
+        downloadButton.style.width = '30px';
+        downloadButton.style.height = '30px';
 
         buttonContainer.appendChild(playButton);
         buttonContainer.appendChild(downloadButton);
