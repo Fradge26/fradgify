@@ -84,39 +84,46 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Play a track
-function playTrack(index, tracks) {
+function playTrack(index, albumTracks, castOnly = false) {
     currentTrack = index;
 
-    if (sound) sound.stop();
+    if (!castOnly && sound) {
+        sound.stop(); // Stop any local playback
+    }
 
-    sound = new Howl({
-        src: [tracks[currentTrack].file],
-        html5: true,
-        autoplay: true,
-        volume: document.getElementById('volume')?.value || 1,
-        onend: () => nextTrack(tracks)
-    });
+    console.log("track URL", albumTracks[currentTrack].file);
 
-    trackInfoElement.innerText = 'Now Playing: ' + tracks[currentTrack].name;
-    isPlaying = true;
+    if (!castOnly) {
+        // Local playback
+        sound = new Howl({
+            src: [albumTracks[currentTrack].file],
+            preload: true,
+            autoplay: true,
+            html5: true,
+            volume: document.getElementById('volume').value,
+            onend: function() {
+                nextTrack(albumTracks);
+            }
+        });
+        sound.play();
+        isPlaying = true;
+        progressInterval = setInterval(updateProgress, 100);
+    } else {
+        // Cast playback
+        castAudio();
+    }
 
-    progressInterval = setInterval(updateProgress, 100);
-
-    const castSession = cast.framework.CastContext.getInstance().getCurrentSession();
-    const media = castSession.getMediaSession(); // the loaded media
-    // Play
-    media.play(
-        null,
-        () => console.log('Playback started on cast device ✅'), // successCallback
-        (err) => console.error('Failed to start playback ❌', err) // errorCallback);
-    );
+    // Update UI
+    trackInfoElement.innerText = 'Now Playing: ' + albumTracks[currentTrack].name;
 }
+
 
 // Next/previous tracks
-function nextTrack(tracks) {
-    currentTrack = (currentTrack + 1) % tracks.length;
-    playTrack(currentTrack, tracks);
+function nextTrack(albumTracks, castOnly = false) {
+    currentTrack = (currentTrack + 1) % albumTracks.length;
+    playTrack(currentTrack, albumTracks, castOnly);
 }
+
 
 function previousTrack(tracks) {
     currentTrack = (currentTrack - 1 + tracks.length) % tracks.length;
@@ -291,7 +298,7 @@ function castAudio() {
                 if (playerState === chrome.cast.media.PlayerState.IDLE &&
                     media.idleReason === chrome.cast.media.IdleReason.FINISHED) {
                     console.log('Track finished on Cast — advancing...');
-                    nextTrack(albumTracks);
+                    nextTrack(albumTracks, true);
                     setTimeout(() => castAudio(), 500);
                 }
             });
