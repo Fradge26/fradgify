@@ -255,9 +255,8 @@ function initializeCastContext() {
 }
 
 function castAudio() {
-    if (sound) {
-        sound.pause(); // stop local playback
-    }
+    if (sound) sound.pause();
+
     if (!sound || !sound._src) {
         console.error('Sound object or _src is not available!');
         return;
@@ -275,18 +274,22 @@ function castAudio() {
     const request = new chrome.cast.media.LoadRequest(mediaInfo);
 
     castSession.loadMedia(request)
-        .then((newMedia) => {
+        .then(() => {
             console.log('Media loaded successfully');
 
-            // newMedia is the actual Media object for this session
-            newMedia.addUpdateListener((isAlive) => {
-                const playerState = newMedia.playerState;
-                console.log('Cast player state:', playerState, 'isAlive:', isAlive);
+            // Wait until castSession.getMediaSession() returns the media object
+            const media = castSession.getMediaSession();
+            if (!media) {
+                console.error('No media session available on cast!');
+                return;
+            }
 
-                if (
-                    playerState === chrome.cast.media.PlayerState.IDLE &&
-                    newMedia.idleReason === chrome.cast.media.IdleReason.FINISHED
-                ) {
+            media.addUpdateListener(() => {
+                const playerState = media.playerState;
+                console.log('Cast player state:', playerState);
+
+                if (playerState === chrome.cast.media.PlayerState.IDLE &&
+                    media.idleReason === chrome.cast.media.IdleReason.FINISHED) {
                     console.log('Track finished on Cast — advancing...');
                     nextTrack(albumTracks);
                     setTimeout(() => castAudio(), 500);
@@ -294,7 +297,7 @@ function castAudio() {
             });
         })
         .catch((error) => console.error('Failed to load media:', error));
-
 }
+
 
 
