@@ -274,16 +274,16 @@ function castAudio() {
     const request = new chrome.cast.media.LoadRequest(mediaInfo);
 
     castSession.loadMedia(request)
-        .then(() => {
-            console.log('Media loaded successfully');
+        .then(() => console.log('Media load request sent'))
+        .catch(err => console.error('Failed to load media:', err));
 
-            // Wait until castSession.getMediaSession() returns the media object
-            const media = castSession.getMediaSession();
-            if (!media) {
-                console.error('No media session available on cast!');
-                return;
-            }
+    // Poll until the media session exists
+    const checkMedia = setInterval(() => {
+        const media = castSession.getMediaSession();
+        if (media) {
+            clearInterval(checkMedia);
 
+            console.log('Media session ready on cast!');
             media.addUpdateListener(() => {
                 const playerState = media.playerState;
                 console.log('Cast player state:', playerState);
@@ -295,9 +295,10 @@ function castAudio() {
                     setTimeout(() => castAudio(), 500);
                 }
             });
-        })
-        .catch((error) => console.error('Failed to load media:', error));
+        }
+    }, 200); // check every 200ms
 }
+
 
 
 
