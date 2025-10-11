@@ -20,13 +20,10 @@ function fetchAlbumData(folderPath) {
         .then(response => response.json())
         .then(data => {
             albumTracks = data.musicFiles.map(file => {
-                // Decode the filename first
-                const decodedFile = decodeURIComponent(file); // Decode the URL-encoded file name
                 const encodedFolderPath = encodeURIComponent(folderPath).replace(/%2F/g, '/');
-                // console.log(file, decodedFile)
                 return {
-                    file: `${musicBaseFolder}/${encodedFolderPath}/${decodedFile}`, // Use the decoded file name
-                    name: decodedFile.replace('.mp3', '') // Remove file extension for display
+                    file: `${musicBaseFolder}/${encodedFolderPath}/${file}`, // file is already Unicode
+                    name: file.replace('.mp3', '')
                 };
             });
 
