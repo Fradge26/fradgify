@@ -97,7 +97,11 @@ function playTrack(index, tracks) {
     const castSession = cast.framework.CastContext.getInstance().getCurrentSession();
     const media = castSession.getMediaSession(); // the loaded media
     // Play
-    media.play(null, successCallback, errorCallback);
+    media.play(
+        null,
+        () => console.log('Playback started on cast device ✅'), // successCallback
+        (err) => console.error('Failed to start playback ❌', err) // errorCallback);
+    );
 }
 
 // Next/previous tracks
@@ -121,7 +125,11 @@ function pauseTrack() {
     const castSession = cast.framework.CastContext.getInstance().getCurrentSession();
     const media = castSession.getMediaSession(); // the loaded media
     // Pause
-    media.pause(null, successCallback, errorCallback);
+    media.pause(
+        null,
+        () => console.log('Playback started on cast device ✅'), // successCallback
+        (err) => console.error('Failed to start playback ❌', err) // errorCallback
+    );
 }
 
 // Toggle play/pause
