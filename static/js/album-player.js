@@ -278,26 +278,28 @@ function castAudio() {
         .then(() => {
             console.log('Media loaded successfully');
 
+            // Re-fetch the active media session AFTER loading
             const media = castSession.getMediaSession();
+
             if (!media) {
                 console.error('No media session available on cast!');
                 return;
             }
 
-            // Listen for media status updates
             media.addUpdateListener((isAlive) => {
-
                 const playerState = media.playerState;
-                console.log('Cast player state:', playerState);
+                console.log('Cast player state:', playerState, 'isAlive:', isAlive);
 
-                // When finished playing, advance to next track
-                if (playerState === chrome.cast.media.PlayerState.IDLE &&
-                    media.idleReason === chrome.cast.media.IdleReason.FINISHED) {
-
+                // Only move to next track when playback finished normally
+                if (
+                    playerState === chrome.cast.media.PlayerState.IDLE &&
+                    media.idleReason === chrome.cast.media.IdleReason.FINISHED
+                ) {
                     console.log('Track finished on Cast — advancing...');
-                    nextTrack(albumTracks); // Move to next track
-                    setTimeout(() => castAudio(), 500); // Cast next track with slight delay
+                    nextTrack(albumTracks);
+                    setTimeout(() => castAudio(), 800); // Small delay before loading next
                 }
+
                 if (!isAlive) {
                     console.log('Media session ended');
                 }
@@ -305,4 +307,5 @@ function castAudio() {
         })
         .catch((error) => console.error('Failed to load media:', error));
 }
+
 
