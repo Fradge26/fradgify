@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const castButton = document.getElementById('cast-button');
-    if (castButton) castButton.addEventListener('click', castAudio);
+    if (castButton) castButton.addEventListener('click', castAudio(currentTrack));
 });
 
 // Play a track
