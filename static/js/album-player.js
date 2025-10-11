@@ -110,7 +110,7 @@ function playTrack(index, albumTracks, castOnly = false) {
         progressInterval = setInterval(updateProgress, 100);
     } else {
         // Cast playback
-        castAudio();
+        castAudio(currentTrack);
     }
 
     // Update UI
