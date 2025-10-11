@@ -175,6 +175,12 @@ function updateProgress() {
         const progress = sound.seek() / sound.duration();
         document.getElementById('progress').style.width = (progress * 100) + '%';
     }
+    const castSession = cast.framework.CastContext.getInstance().getCurrentSession();
+    const media = castSession.getMediaSession();
+    if (castSession && media) {
+        const progress = media.getEstimatedTime() / sound.duration();
+        document.getElementById('progress').style.width = (progress * 100) + '%';
+    }
 }
 
 // Render track list
