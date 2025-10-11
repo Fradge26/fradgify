@@ -1,6 +1,7 @@
 from flask import Response, render_template
 from . import home_bp
 import os
+import re
 from pathlib import Path
 from urllib.parse import quote_from_bytes
 from collections import defaultdict
@@ -56,6 +57,7 @@ def homepage():
 def report():
     return render_template('report.html')
 
+
 def quote_apache(path: str) -> str:
     """
     Quote a filesystem path so that it matches Apache autoindex hrefs.
@@ -64,9 +66,10 @@ def quote_apache(path: str) -> str:
     # Step 1: Convert to the raw filesystem bytes representation
     # This ensures we get the same byte values Apache uses
     path_bytes = os.fsencode(path.replace(os.sep, '/'))
+    path_quoted = quote_from_bytes(path_bytes, safe=b'/')
 
     # Step 2: Percent-encode all non-ASCII bytes, leaving '/' safe
-    return quote_from_bytes(path_bytes, safe=b'/')
+    return path_quoted
 
 
 def get_latest(library, exts, num_files=10):
