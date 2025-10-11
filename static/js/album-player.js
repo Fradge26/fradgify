@@ -277,4 +277,32 @@ function castAudio() {
     castSession.loadMedia(request)
         .then(() => console.log('Media loaded successfully'))
         .catch((error) => console.error('Failed to load media:', error));
+
+
+    castSession.loadMedia(request)
+    .then(() => {
+        console.log('Media loaded successfully');
+
+        const media = castSession.getMediaSession();
+        if (!media) return;
+
+        // Listen for media status updates
+        media.addUpdateListener((isAlive) => {
+            if (!isAlive) return; // Skip null/ended states
+
+            const playerState = media.playerState;
+            console.log('Cast player state:', playerState);
+
+            // When finished playing, advance to next track
+            if (playerState === chrome.cast.media.PlayerState.IDLE &&
+                media.idleReason === chrome.cast.media.IdleReason.FINISHED) {
+
+                console.log('Track finished on Cast — advancing...');
+                nextTrack(albumTracks); // Re-use your existing logic
+                castAudio(); // Cast the new track automatically
+            }
+        });
+    })
+    .catch((error) => console.error('Failed to load media:', error));
+
 }
