@@ -67,11 +67,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const castSession = cast.framework.CastContext.getInstance().getCurrentSession();
             const media = castSession.getMediaSession(); // the loaded media
-            media.seek(
-                percentage * sound.duration(),
-                () => console.log('Playback started on cast device ✅'), // successCallback
-                (err) => console.error('Failed to start playback ❌', err) // errorCallback);
-            );
+            if (castSession && media) {
+                const seekRequest = new chrome.cast.media.SeekRequest();
+                seekRequest.currentTime = percentage * sound.duration();
+                media.seek(
+                    seekRequest,
+                    () => console.log('Seek successful on cast device ✅'), // successCallback
+                    (err) => console.error('Failed to seek on Cast ❌', err) // errorCallback
+                );
+            };
         });
     }
 
@@ -131,8 +135,8 @@ function pauseTrack() {
     // Pause
     media.pause(
         null,
-        () => console.log('Playback started on cast device ✅'), // successCallback
-        (err) => console.error('Failed to start playback ❌', err) // errorCallback
+        () => console.log('Pause successful on cast device ✅'), // successCallback
+        (err) => console.error('Failed to pause playback ❌', err) // errorCallback
     );
 }
 
