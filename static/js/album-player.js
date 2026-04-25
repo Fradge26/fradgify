@@ -362,6 +362,16 @@ function castAudio(trackIndex = currentTrack) {
     stopLocalPlayback();
 
     const mediaInfo = new chrome.cast.media.MediaInfo(track.file, 'audio/mp3');
+    const metadata = new chrome.cast.media.MusicTrackMediaMetadata();
+    metadata.title = track.name;
+    metadata.albumName = albumNameElement ? albumNameElement.textContent : '';
+    metadata.artist = artistNameElement ? artistNameElement.textContent : '';
+
+    if (albumArtElement && albumArtElement.src) {
+        metadata.images = [{ url: albumArtElement.src }];
+    }
+
+    mediaInfo.metadata = metadata;
     const request = new chrome.cast.media.LoadRequest(mediaInfo);
 
     session.loadMedia(request)
