@@ -44,7 +44,10 @@ def get_album():
     # Get the folder path from the query parameter
     logging.debug(f"api endpoint /album called")
     folder_path = request.args.get('path', default='', type=str)
-    album_path = os.path.join(MUSIC_DIR, folder_path)
+    try:
+        album_path = resolve_music_subpath(folder_path)
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 400
 
     try:
         # List all MP3 files in the specified directory
@@ -61,6 +64,16 @@ def get_album():
     except Exception as e:
         logging.debug(f"Exception: {e}")
         return jsonify({'error': str(e)}), 500
+
+
+def resolve_music_subpath(folder_path):
+    candidate_path = os.path.realpath(os.path.join(MUSIC_DIR, folder_path))
+    music_root = os.path.realpath(MUSIC_DIR)
+
+    if os.path.commonpath([music_root, candidate_path]) != music_root:
+        raise ValueError("Invalid album path")
+
+    return candidate_path
 
 
 @music_bp.route('/album_list', methods=['GET'])
