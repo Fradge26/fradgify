@@ -61,6 +61,11 @@ function updateCurrentTrackInfo(name) {
     }
 }
 
+function getCurrentTrackDuration() {
+    const current = albumTracks[currentTrack];
+    return current && current.duration ? current.duration : 0;
+}
+
 function getAlbumMetadata(trackName) {
     const metadata = new chrome.cast.media.MusicTrackMediaMetadata();
     metadata.title = trackName;
@@ -186,7 +191,8 @@ function fetchAlbumData(folderPath) {
                 const encodedFolderPath = encodeURIComponent(folderPath).replace(/%2F/g, '/');
                 return {
                     file: `${musicBaseFolder}/${encodedFolderPath}/${encodeURIComponent(file)}`,
-                    name: file.replace('.mp3', '')
+                    name: file.replace('.mp3', ''),
+                    duration: data.trackDurations && data.trackDurations[file] ? Number(data.trackDurations[file]) : 0
                 };
             });
 
@@ -360,7 +366,7 @@ function updateProgress() {
     if (activePlayback === 'cast') {
         const media = getCastMediaSession();
         const castTrack = getCastTrackDetails(media);
-        const duration = castTrack.duration;
+        const duration = getCurrentTrackDuration() || castTrack.duration;
         if (media && duration) {
             const progress = media.getEstimatedTime() / duration;
             progressElement.style.width = `${Math.min(progress, 1) * 100}%`;
@@ -555,11 +561,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (activePlayback === 'cast') {
                 const media = getCastMediaSession();
-                if (!media || !media.media || !media.media.duration) {
+                const duration = getCurrentTrackDuration();
+                if (!media || !duration) {
                     return;
                 }
                 const seekRequest = new chrome.cast.media.SeekRequest();
-                seekRequest.currentTime = percentage * media.media.duration;
+                seekRequest.currentTime = percentage * duration;
                 media.seek(
                     seekRequest,
                     () => updateProgress(),

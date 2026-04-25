@@ -52,12 +52,18 @@ def get_album():
     try:
         # List all MP3 files in the specified directory
         music_files = list_music_files(album_path)
+        track_durations = get_track_durations(album_path, music_files)
         f1 = next(f for f in os.listdir(album_path) if f.endswith(".mp3"))
         audio_file = File(f"{album_path}/{f1}")
         album_art = get_album_art_path(album_path, audio_file)
         artist, album, year = get_audio_file_info(audio_file)
         album_info = {"artist": artist, "album": album}
-        out_dict = {'musicFiles': music_files, 'albumArt': album_art, "albumInfo": album_info}
+        out_dict = {
+            'musicFiles': music_files,
+            'trackDurations': track_durations,
+            'albumArt': album_art,
+            "albumInfo": album_info
+        }
         logging.debug(f"{out_dict=}")
         return jsonify(out_dict)
 
@@ -122,6 +128,15 @@ def list_music_files(folder):
     out_files = [f for f in out_files if f.endswith(".mp3")]
     logging.debug(f"out_files: {out_files}")
     return sorted(out_files)
+
+
+def get_track_durations(folder, filenames):
+    track_durations = {}
+    for filename in filenames:
+        audio_file = File(os.path.join(folder, filename))
+        duration = getattr(getattr(audio_file, "info", None), "length", 0) or 0
+        track_durations[filename] = round(duration, 3)
+    return track_durations
 
 
 def get_album_art_path(album_path, audio):
