@@ -6,6 +6,7 @@ let isPlaying = false;
 let isPaused = false;
 let activePlayback = null;
 let preferredPlayback = 'local';
+let castCompletionHandled = false;
 
 const artistNameElement = document.getElementById('artist-name');
 const albumNameElement = document.getElementById('album-name');
@@ -52,6 +53,45 @@ function getCastSession() {
 function getCastMediaSession() {
     const session = getCastSession();
     return session ? session.getMediaSession() : null;
+}
+
+function updateCurrentTrackInfo(name) {
+    if (trackInfoElement) {
+        trackInfoElement.innerText = `Now Playing: ${name}`;
+    }
+}
+
+function syncCastMediaState(media) {
+    if (!media) {
+        return;
+    }
+
+    if (media.playerState === chrome.cast.media.PlayerState.PLAYING) {
+        castCompletionHandled = false;
+        setPlaybackState('cast', true);
+    } else if (media.playerState === chrome.cast.media.PlayerState.PAUSED) {
+        setPlaybackState('cast', false);
+    } else if (
+        media.playerState === chrome.cast.media.PlayerState.IDLE &&
+        media.idleReason === chrome.cast.media.IdleReason.FINISHED &&
+        !castCompletionHandled
+    ) {
+        castCompletionHandled = true;
+        nextTrack(albumTracks, true);
+    }
+}
+
+function attachCastMediaListener(media, fallbackTrackName) {
+    if (!media) {
+        return;
+    }
+
+    if (fallbackTrackName) {
+        updateCurrentTrackInfo(fallbackTrackName);
+    }
+
+    syncCastMediaState(media);
+    media.addUpdateListener(() => syncCastMediaState(media));
 }
 
 function stopLocalPlayback() {
@@ -135,7 +175,7 @@ function playTrack(index, tracks, castOnly = false) {
     });
 
     sound.play();
-    trackInfoElement.innerText = `Now Playing: ${tracks[currentTrack].name}`;
+    updateCurrentTrackInfo(tracks[currentTrack].name);
 }
 
 function nextTrack(tracks, castOnly = activePlayback === 'cast') {
@@ -378,26 +418,9 @@ function castAudio(trackIndex = currentTrack) {
         .then(() => {
             currentTrack = trackIndex;
             activePlayback = 'cast';
+            castCompletionHandled = false;
             setPlaybackState('cast', true);
-            trackInfoElement.innerText = `Now Playing: ${track.name}`;
-
-            const media = session.getMediaSession();
-            if (!media) {
-                return;
-            }
-
-            media.addUpdateListener(() => {
-                if (media.playerState === chrome.cast.media.PlayerState.PLAYING) {
-                    setPlaybackState('cast', true);
-                } else if (media.playerState === chrome.cast.media.PlayerState.PAUSED) {
-                    setPlaybackState('cast', false);
-                } else if (
-                    media.playerState === chrome.cast.media.PlayerState.IDLE &&
-                    media.idleReason === chrome.cast.media.IdleReason.FINISHED
-                ) {
-                    nextTrack(albumTracks, true);
-                }
-            });
+            attachCastMediaListener(session.getMediaSession(), track.name);
         })
         .catch(err => console.error('Failed to load media on cast device', err));
 }
@@ -469,4 +492,10 @@ document.addEventListener('DOMContentLoaded', () => {
             updateProgress();
         });
     }
+
+    window.setInterval(() => {
+        if (activePlayback === 'cast') {
+            syncCastMediaState(getCastMediaSession());
+        }
+    }, 1000);
 });
