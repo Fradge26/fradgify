@@ -86,6 +86,14 @@ function buildCastQueueItems() {
     });
 }
 
+function buildCastQueueData(startIndex) {
+    const queueData = new chrome.cast.media.QueueData();
+    queueData.items = buildCastQueueItems();
+    queueData.startIndex = startIndex;
+    queueData.repeatMode = chrome.cast.media.RepeatMode.OFF;
+    return queueData;
+}
+
 function syncCastMediaState(media) {
     if (!media) {
         return;
@@ -462,11 +470,13 @@ function castAudio(trackIndex = currentTrack) {
 
     stopLocalPlayback();
 
-    const queueItems = buildCastQueueItems();
-    const request = new chrome.cast.media.QueueLoadRequest(queueItems);
-    request.startIndex = trackIndex;
+    const mediaInfo = new chrome.cast.media.MediaInfo(track.file, 'audio/mp3');
+    mediaInfo.metadata = getAlbumMetadata(track.name);
 
-    session.queueLoad(request)
+    const request = new chrome.cast.media.LoadRequest(mediaInfo);
+    request.queueData = buildCastQueueData(trackIndex);
+
+    session.loadMedia(request)
         .then(() => {
             currentTrack = trackIndex;
             activePlayback = 'cast';
