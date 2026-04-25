@@ -5,6 +5,7 @@ let albumTracks = [];
 let isPlaying = false;
 let isPaused = false;
 let activePlayback = null;
+let preferredPlayback = 'local';
 
 const artistNameElement = document.getElementById('artist-name');
 const albumNameElement = document.getElementById('album-name');
@@ -63,6 +64,9 @@ function stopLocalPlayback() {
 
 function setPlaybackState(source, playing) {
     activePlayback = source;
+    if (source) {
+        preferredPlayback = source;
+    }
     isPlaying = playing;
     isPaused = !playing && source !== null;
     updatePlayPauseText(playing ? 'Pause' : 'Play');
@@ -199,7 +203,7 @@ function togglePlayPause() {
     }
 
     if (!isPlaying && !isPaused) {
-        if (activePlayback === 'cast') {
+        if (preferredPlayback === 'cast' && getCastSession()) {
             castAudio(currentTrack);
         } else {
             playTrack(currentTrack, albumTracks);
@@ -264,7 +268,7 @@ function renderTrackList() {
         const playButton = document.createElement('button');
         playButton.innerHTML = '<img src="/static/icons/play_arrow_37dp_007BFF_FILL0_wght400_GRAD0_opsz40.svg" alt="Play" width="24" height="24">';
         playButton.onclick = () => {
-            const shouldCast = activePlayback === 'cast' && !!getCastSession();
+            const shouldCast = preferredPlayback === 'cast' && !!getCastSession();
             playTrack(index, albumTracks, shouldCast);
         };
         playButton.style.padding = '2px';
@@ -322,7 +326,13 @@ function initializeCastContext(retries = 10) {
     context.addEventListener(
         cast.framework.CastContextEventType.SESSION_STATE_CHANGED,
         event => {
-            if (event.sessionState === cast.framework.SessionState.SESSION_ENDED) {
+            if (
+                event.sessionState === cast.framework.SessionState.SESSION_STARTED ||
+                event.sessionState === cast.framework.SessionState.SESSION_RESUMED
+            ) {
+                preferredPlayback = 'cast';
+            } else if (event.sessionState === cast.framework.SessionState.SESSION_ENDED) {
+                preferredPlayback = 'local';
                 activePlayback = sound ? 'local' : null;
                 if (!sound) {
                     clearProgressTimer();
@@ -411,8 +421,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (castButton) {
         castButton.addEventListener('click', () => {
             const session = getCastSession();
-            if (session && albumTracks.length) {
-                castAudio(currentTrack);
+            if (session) {
+                preferredPlayback = 'cast';
+                if (albumTracks.length) {
+                    castAudio(currentTrack);
+                }
             }
         });
     }
