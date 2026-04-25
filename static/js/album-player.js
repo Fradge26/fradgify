@@ -61,9 +61,42 @@ function updateCurrentTrackInfo(name) {
     }
 }
 
+function getAlbumMetadata(trackName) {
+    const metadata = new chrome.cast.media.MusicTrackMediaMetadata();
+    metadata.title = trackName;
+    metadata.albumName = albumNameElement ? albumNameElement.textContent : '';
+    metadata.artist = artistNameElement ? artistNameElement.textContent : '';
+
+    if (albumArtElement && albumArtElement.src) {
+        metadata.images = [{ url: albumArtElement.src }];
+    }
+
+    return metadata;
+}
+
+function buildCastQueueItems() {
+    return albumTracks.map(track => {
+        const mediaInfo = new chrome.cast.media.MediaInfo(track.file, 'audio/mp3');
+        mediaInfo.metadata = getAlbumMetadata(track.name);
+
+        const queueItem = new chrome.cast.media.QueueItem(mediaInfo);
+        queueItem.autoplay = true;
+        queueItem.preloadTime = 10;
+        return queueItem;
+    });
+}
+
 function syncCastMediaState(media) {
     if (!media) {
         return;
+    }
+
+    if (media.media && media.media.metadata && media.media.metadata.title) {
+        updateCurrentTrackInfo(media.media.metadata.title);
+        const playingIndex = albumTracks.findIndex(track => track.name === media.media.metadata.title);
+        if (playingIndex >= 0) {
+            currentTrack = playingIndex;
+        }
     }
 
     if (media.playerState === chrome.cast.media.PlayerState.PLAYING) {
@@ -182,6 +215,20 @@ function nextTrack(tracks, castOnly = activePlayback === 'cast') {
     if (!tracks.length) {
         return;
     }
+    if (castOnly) {
+        const media = getCastMediaSession();
+        if (media && typeof media.queueNext === 'function') {
+            media.queueNext(
+                null,
+                () => {
+                    castCompletionHandled = false;
+                    syncCastMediaState(media);
+                },
+                err => console.error('Failed to skip to next cast track', err)
+            );
+            return;
+        }
+    }
     currentTrack = (currentTrack + 1) % tracks.length;
     playTrack(currentTrack, tracks, castOnly);
 }
@@ -189,6 +236,20 @@ function nextTrack(tracks, castOnly = activePlayback === 'cast') {
 function previousTrack(tracks, castOnly = activePlayback === 'cast') {
     if (!tracks.length) {
         return;
+    }
+    if (castOnly) {
+        const media = getCastMediaSession();
+        if (media && typeof media.queuePrev === 'function') {
+            media.queuePrev(
+                null,
+                () => {
+                    castCompletionHandled = false;
+                    syncCastMediaState(media);
+                },
+                err => console.error('Failed to skip to previous cast track', err)
+            );
+            return;
+        }
     }
     currentTrack = (currentTrack - 1 + tracks.length) % tracks.length;
     playTrack(currentTrack, tracks, castOnly);
@@ -401,20 +462,11 @@ function castAudio(trackIndex = currentTrack) {
 
     stopLocalPlayback();
 
-    const mediaInfo = new chrome.cast.media.MediaInfo(track.file, 'audio/mp3');
-    const metadata = new chrome.cast.media.MusicTrackMediaMetadata();
-    metadata.title = track.name;
-    metadata.albumName = albumNameElement ? albumNameElement.textContent : '';
-    metadata.artist = artistNameElement ? artistNameElement.textContent : '';
+    const queueItems = buildCastQueueItems();
+    const request = new chrome.cast.media.QueueLoadRequest(queueItems);
+    request.startIndex = trackIndex;
 
-    if (albumArtElement && albumArtElement.src) {
-        metadata.images = [{ url: albumArtElement.src }];
-    }
-
-    mediaInfo.metadata = metadata;
-    const request = new chrome.cast.media.LoadRequest(mediaInfo);
-
-    session.loadMedia(request)
+    session.queueLoad(request)
         .then(() => {
             currentTrack = trackIndex;
             activePlayback = 'cast';
