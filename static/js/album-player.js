@@ -94,14 +94,33 @@ function buildCastQueueData(startIndex) {
     return queueData;
 }
 
+function getCastQueueItem(media) {
+    if (!media || !Array.isArray(media.items) || media.currentItemId == null) {
+        return null;
+    }
+
+    return media.items.find(item => item.itemId === media.currentItemId) || null;
+}
+
+function getCastTrackDetails(media) {
+    const queueItem = getCastQueueItem(media);
+    const queueMedia = queueItem && queueItem.media ? queueItem.media : null;
+    const metadata = queueMedia && queueMedia.metadata ? queueMedia.metadata : media.media && media.media.metadata;
+    const title = metadata && metadata.title ? metadata.title : null;
+    const duration = (queueMedia && queueMedia.duration) || (media.media && media.media.duration) || 0;
+
+    return { title, duration };
+}
+
 function syncCastMediaState(media) {
     if (!media) {
         return;
     }
 
-    if (media.media && media.media.metadata && media.media.metadata.title) {
-        updateCurrentTrackInfo(media.media.metadata.title);
-        const playingIndex = albumTracks.findIndex(track => track.name === media.media.metadata.title);
+    const castTrack = getCastTrackDetails(media);
+    if (castTrack.title) {
+        updateCurrentTrackInfo(castTrack.title);
+        const playingIndex = albumTracks.findIndex(track => track.name === castTrack.title);
         if (playingIndex >= 0) {
             currentTrack = playingIndex;
         }
@@ -230,7 +249,7 @@ function nextTrack(tracks, castOnly = activePlayback === 'cast') {
                 null,
                 () => {
                     castCompletionHandled = false;
-                    syncCastMediaState(media);
+                    syncCastMediaState(getCastMediaSession());
                 },
                 err => console.error('Failed to skip to next cast track', err)
             );
@@ -252,7 +271,7 @@ function previousTrack(tracks, castOnly = activePlayback === 'cast') {
                 null,
                 () => {
                     castCompletionHandled = false;
-                    syncCastMediaState(media);
+                    syncCastMediaState(getCastMediaSession());
                 },
                 err => console.error('Failed to skip to previous cast track', err)
             );
@@ -340,10 +359,13 @@ function updateProgress() {
 
     if (activePlayback === 'cast') {
         const media = getCastMediaSession();
-        const duration = media && media.media ? media.media.duration : 0;
+        const castTrack = getCastTrackDetails(media);
+        const duration = castTrack.duration;
         if (media && duration) {
             const progress = media.getEstimatedTime() / duration;
             progressElement.style.width = `${Math.min(progress, 1) * 100}%`;
+        } else if (progressElement) {
+            progressElement.style.width = '0%';
         }
         return;
     }
