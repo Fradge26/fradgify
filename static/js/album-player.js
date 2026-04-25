@@ -108,11 +108,16 @@ function getCastQueueItem(media) {
 }
 
 function getCastTrackDetails(media) {
+    if (!media) {
+        return { title: null, duration: 0 };
+    }
+
     const queueItem = getCastQueueItem(media);
     const queueMedia = queueItem && queueItem.media ? queueItem.media : null;
-    const metadata = queueMedia && queueMedia.metadata ? queueMedia.metadata : media.media && media.media.metadata;
+    const baseMedia = media.media || null;
+    const metadata = queueMedia && queueMedia.metadata ? queueMedia.metadata : baseMedia && baseMedia.metadata;
     const title = metadata && metadata.title ? metadata.title : null;
-    const duration = (queueMedia && queueMedia.duration) || (media.media && media.media.duration) || 0;
+    const duration = (queueMedia && queueMedia.duration) || (baseMedia && baseMedia.duration) || 0;
 
     return { title, duration };
 }
