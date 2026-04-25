@@ -303,9 +303,13 @@ window.__onGCastApiAvailable = function(isAvailable) {
     }
 };
 
-function initializeCastContext() {
+function initializeCastContext(retries = 10) {
     const context = getCastContext();
     if (!context) {
+        if (retries > 0) {
+            window.setTimeout(() => initializeCastContext(retries - 1), 250);
+            return;
+        }
         console.error('Cast API not initialized');
         return;
     }
