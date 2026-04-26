@@ -10,3 +10,4 @@ ALBUMS_JSON_PATH = STATIC_DIR / "json" / "albums.json"
 ALBUM_ART_DIR = STATIC_DIR / "album-art"
 ALBUM_ART_DIR_URL = "/static/album-art"
 MUSIC_DIR_REL = Path("media") / "music" / "complete"
+APACHE_LOG_DIR = Path("/var/log/apache2")
