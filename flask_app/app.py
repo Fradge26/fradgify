@@ -8,14 +8,15 @@ import json
 import hashlib
 from datetime import datetime as dt
 from urllib.parse import quote
+from pathlib import Path
 
 logging.basicConfig(level=logging.DEBUG)
 app = Flask(__name__)
 
-SITE_DOMAIN = "dev.fradgify.kozow.com"
-MUSIC_FOLDER = f"/var/www/{SITE_DOMAIN}/media/music/complete"
-ALBUMS_JSON_PATH = f"/var/www/{SITE_DOMAIN}/album-player/browse/albums.json"
-TEMP_ALBUM_ART_FOLDER = f"/var/www/{SITE_DOMAIN}/album-player/album-art-extract"
+APP_ROOT = Path(__file__).resolve().parent.parent
+MUSIC_FOLDER = APP_ROOT / "media" / "music" / "complete"
+ALBUMS_JSON_PATH = APP_ROOT / "static" / "json" / "albums.json"
+TEMP_ALBUM_ART_FOLDER = APP_ROOT / "static" / "album-art"
 logging.debug(f"api started: {__file__}")
 
 
@@ -66,7 +67,8 @@ def get_album_art_path(album_path, audio):
             logging.debug(short_hash)
             album_art_filename = f'{short_hash}.{album_art_mime}'
             album_art_filepath = os.path.join(TEMP_ALBUM_ART_FOLDER, album_art_filename)
-            
+
+            TEMP_ALBUM_ART_FOLDER.mkdir(parents=True, exist_ok=True)
             # Save the album art as an image file
             with open(album_art_filepath, 'wb') as img_file:
                 img_file.write(album_art_data)
@@ -148,6 +150,7 @@ def get_album_list():
                         }
                     )
         final_albums_dict = {"albums": album_list}
+        ALBUMS_JSON_PATH.parent.mkdir(parents=True, exist_ok=True)
         with open(ALBUMS_JSON_PATH, "w") as final:
             json.dump(final_albums_dict, final)
         return jsonify({"success": f"{len(album_list)} albums written to albums.json at {dt.now()}"}, 200)

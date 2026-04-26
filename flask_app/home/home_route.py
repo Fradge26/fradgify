@@ -9,7 +9,6 @@ from collections import defaultdict
 
 SERVER_SITE_HOME = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 MEDIA_DIR = os.path.join(SERVER_SITE_HOME, "media")
-SITE_DOMAIN = "dev.fradgify.kozow.com"
 CWD_DIR = os.getcwd()
 VIDEO_EXT = {'.mp4', '.avi', '.mov', '.mkv', '.wmv', '.flv', '.webm', '.mpeg', '.mpg'}
 AUDIO_EXT = {".mp3"}

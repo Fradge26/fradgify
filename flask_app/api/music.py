@@ -12,7 +12,6 @@ from pathlib import Path
 import io
 
 
-SITE_DOMAIN = "dev.fradgify.kozow.com"
 SITE_HOME = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 MEDIA_DIR = os.path.join(SITE_HOME, "media")
 MUSIC_DIR = os.path.join(MEDIA_DIR, "music", "complete")
