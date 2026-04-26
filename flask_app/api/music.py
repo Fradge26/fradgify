@@ -1,24 +1,19 @@
-from . import music_bp
+import hashlib
+import io
+import json
 import logging
 import os
+from PIL import Image
+from datetime import datetime as dt
 from flask import jsonify, send_from_directory, request, render_template
 from mutagen import File
 from mutagen.id3 import ID3, APIC
-from PIL import Image
-import json
-import hashlib
-from datetime import datetime as dt
 from pathlib import Path
-import io
+
+from . import music_bp
+from ..paths import MUSIC_DIR, ALBUMS_JSON_PATH, ALBUM_ART_DIR, ALBUM_ART_DIR_URL
 
 
-SITE_DOMAIN = "dev.fradgify.kozow.com"
-SITE_HOME = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-MEDIA_DIR = os.path.join(SITE_HOME, "media")
-MUSIC_DIR = os.path.join(MEDIA_DIR, "music", "complete")
-ALBUMS_JSON_PATH = os.path.join(SITE_HOME, "static", "json", "albums.json")
-ALBUM_ART_REL_DIR = os.path.join("/", "static", "album-art")
-ALBUM_ART_DIR = os.path.join(SITE_HOME, "static", "album-art")
 logging.debug(f"api started: {__file__}")
 
 
@@ -44,23 +39,42 @@ def get_album():
     # Get the folder path from the query parameter
     logging.debug(f"api endpoint /album called")
     folder_path = request.args.get('path', default='', type=str)
-    album_path = os.path.join(MUSIC_DIR, folder_path)
+    try:
+        album_path = resolve_music_subpath(folder_path)
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 400
 
     try:
         # List all MP3 files in the specified directory
         music_files = list_music_files(album_path)
+        track_durations = get_track_durations(album_path, music_files)
         f1 = next(f for f in os.listdir(album_path) if f.endswith(".mp3"))
         audio_file = File(f"{album_path}/{f1}")
         album_art = get_album_art_path(album_path, audio_file)
         artist, album, year = get_audio_file_info(audio_file)
         album_info = {"artist": artist, "album": album}
-        out_dict = {'musicFiles': music_files, 'albumArt': album_art, "albumInfo": album_info}
+        out_dict = {
+            'musicFiles': music_files,
+            'trackDurations': track_durations,
+            'albumArt': album_art,
+            "albumInfo": album_info
+        }
         logging.debug(f"{out_dict=}")
         return jsonify(out_dict)
 
     except Exception as e:
         logging.debug(f"Exception: {e}")
         return jsonify({'error': str(e)}), 500
+
+
+def resolve_music_subpath(folder_path):
+    candidate_path = os.path.realpath(os.path.join(MUSIC_DIR, folder_path))
+    music_root = os.path.realpath(MUSIC_DIR)
+
+    if os.path.commonpath([music_root, candidate_path]) != music_root:
+        raise ValueError("Invalid album path")
+
+    return candidate_path
 
 
 @music_bp.route('/album_list', methods=['GET'])
@@ -111,12 +125,21 @@ def list_music_files(folder):
     return sorted(out_files)
 
 
+def get_track_durations(folder, filenames):
+    track_durations = {}
+    for filename in filenames:
+        audio_file = File(os.path.join(folder, filename))
+        duration = getattr(getattr(audio_file, "info", None), "length", 0) or 0
+        track_durations[filename] = round(duration, 3)
+    return track_durations
+
+
 def get_album_art_path(album_path, audio):
     hash_object = hashlib.sha256(album_path.encode('utf-8'))
     short_hash = hash_object.hexdigest()[:12]
     album_art_filename = short_hash + ".jpg"
     album_art_filepath = os.path.join(ALBUM_ART_DIR, album_art_filename)
-    album_art_rel_filepath = os.path.join(ALBUM_ART_REL_DIR, album_art_filename)
+    album_art_rel_filepath = os.path.join(ALBUM_ART_DIR_URL, album_art_filename)
 
     if os.path.exists(album_art_filepath):
         return album_art_rel_filepath
@@ -138,7 +161,7 @@ def get_album_art_path(album_path, audio):
             logging.debug(f"Album art extracted to: {album_art_filepath}")
             return album_art_rel_filepath
     else:
-        return os.path.join(ALBUM_ART_REL_DIR, "default_album_art.jpg")
+        return os.path.join(ALBUM_ART_DIR_URL, "default_album_art.jpg")
 
 
 def get_audio_file_info(audio):

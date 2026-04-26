@@ -2,19 +2,192 @@ let currentTrack = 0;
 let sound = null;
 let progressInterval = null;
 let albumTracks = [];
-let isPlaying = false; // Track if audio is currently playing
-let isPaused = false; // Track if audio is currently paused
+let isPlaying = false;
+let isPaused = false;
+let activePlayback = null;
+let preferredPlayback = 'local';
+let castCompletionHandled = false;
 
 const artistNameElement = document.getElementById('artist-name');
 const albumNameElement = document.getElementById('album-name');
 const albumArtElement = document.getElementById('album-art');
 const trackListElement = document.getElementById('track-list');
 const trackInfoElement = document.getElementById('track-info');
-const musicBaseFolder = "/media/music/complete";
-const albumArtExtractFolder = "/static/album-art";
-const defaultAlbumArt = "default_album_art.jpg";
+const progressElement = document.getElementById('progress');
+const volumeSlider = document.getElementById('volume');
 
-// Function to fetch album data from the server with a dynamic folder path
+const musicBaseFolder = `${window.location.origin}/media/music/complete`;
+const defaultAlbumArt = '/static/album-art/default_album_art.jpg';
+
+function updatePlayPauseText(label) {
+    const playPauseText = document.getElementById('play-pause-text');
+    if (playPauseText) {
+        playPauseText.textContent = label;
+    }
+}
+
+function clearProgressTimer() {
+    if (progressInterval) {
+        clearInterval(progressInterval);
+        progressInterval = null;
+    }
+}
+
+function startProgressTimer() {
+    clearProgressTimer();
+    progressInterval = setInterval(updateProgress, 250);
+}
+
+function getCastContext() {
+    if (typeof cast === 'undefined' || !cast.framework) {
+        return null;
+    }
+    return cast.framework.CastContext.getInstance();
+}
+
+function getCastSession() {
+    const context = getCastContext();
+    return context ? context.getCurrentSession() : null;
+}
+
+function getCastMediaSession() {
+    const session = getCastSession();
+    return session ? session.getMediaSession() : null;
+}
+
+function updateCurrentTrackInfo(name) {
+    if (trackInfoElement) {
+        trackInfoElement.innerText = `Now Playing: ${name}`;
+    }
+}
+
+function getCurrentTrackDuration() {
+    const current = albumTracks[currentTrack];
+    return current && current.duration ? current.duration : 0;
+}
+
+function getAlbumMetadata(trackName) {
+    const metadata = new chrome.cast.media.MusicTrackMediaMetadata();
+    metadata.title = trackName;
+    metadata.albumName = albumNameElement ? albumNameElement.textContent : '';
+    metadata.artist = artistNameElement ? artistNameElement.textContent : '';
+
+    if (albumArtElement && albumArtElement.src) {
+        metadata.images = [{ url: albumArtElement.src }];
+    }
+
+    return metadata;
+}
+
+function buildCastQueueItems() {
+    return albumTracks.map(track => {
+        const mediaInfo = new chrome.cast.media.MediaInfo(track.file, 'audio/mp3');
+        mediaInfo.metadata = getAlbumMetadata(track.name);
+
+        const queueItem = new chrome.cast.media.QueueItem(mediaInfo);
+        queueItem.autoplay = true;
+        queueItem.preloadTime = 10;
+        return queueItem;
+    });
+}
+
+function buildCastQueueData(startIndex) {
+    const queueData = new chrome.cast.media.QueueData();
+    queueData.items = buildCastQueueItems();
+    queueData.startIndex = startIndex;
+    queueData.repeatMode = chrome.cast.media.RepeatMode.OFF;
+    return queueData;
+}
+
+function getCastQueueItem(media) {
+    if (!media || !Array.isArray(media.items) || media.currentItemId == null) {
+        return null;
+    }
+
+    return media.items.find(item => item.itemId === media.currentItemId) || null;
+}
+
+function getCastTrackDetails(media) {
+    if (!media) {
+        return { title: null, duration: 0 };
+    }
+
+    const queueItem = getCastQueueItem(media);
+    const queueMedia = queueItem && queueItem.media ? queueItem.media : null;
+    const baseMedia = media.media || null;
+    const metadata = queueMedia && queueMedia.metadata ? queueMedia.metadata : baseMedia && baseMedia.metadata;
+    const title = metadata && metadata.title ? metadata.title : null;
+    const duration = (queueMedia && queueMedia.duration) || (baseMedia && baseMedia.duration) || 0;
+
+    return { title, duration };
+}
+
+function syncCastMediaState(media) {
+    if (!media) {
+        return;
+    }
+
+    const castTrack = getCastTrackDetails(media);
+    if (castTrack.title) {
+        updateCurrentTrackInfo(castTrack.title);
+        const playingIndex = albumTracks.findIndex(track => track.name === castTrack.title);
+        if (playingIndex >= 0) {
+            currentTrack = playingIndex;
+        }
+    }
+
+    if (media.playerState === chrome.cast.media.PlayerState.PLAYING) {
+        castCompletionHandled = false;
+        setPlaybackState('cast', true);
+    } else if (media.playerState === chrome.cast.media.PlayerState.PAUSED) {
+        setPlaybackState('cast', false);
+    } else if (
+        media.playerState === chrome.cast.media.PlayerState.IDLE &&
+        media.idleReason === chrome.cast.media.IdleReason.FINISHED &&
+        !castCompletionHandled
+    ) {
+        castCompletionHandled = true;
+        nextTrack(albumTracks, true);
+    }
+}
+
+function attachCastMediaListener(media, fallbackTrackName) {
+    if (!media) {
+        return;
+    }
+
+    if (fallbackTrackName) {
+        updateCurrentTrackInfo(fallbackTrackName);
+    }
+
+    syncCastMediaState(media);
+    media.addUpdateListener(() => syncCastMediaState(media));
+}
+
+function stopLocalPlayback() {
+    if (sound) {
+        sound.stop();
+        sound.unload();
+        sound = null;
+    }
+}
+
+function setPlaybackState(source, playing) {
+    activePlayback = source;
+    if (source) {
+        preferredPlayback = source;
+    }
+    isPlaying = playing;
+    isPaused = !playing && source !== null;
+    updatePlayPauseText(playing ? 'Pause' : 'Play');
+
+    if (playing) {
+        startProgressTimer();
+    } else if (source !== 'cast') {
+        clearProgressTimer();
+    }
+}
+
 function fetchAlbumData(folderPath) {
     fetch(`/music/album/?path=${encodeURIComponent(folderPath)}`)
         .then(response => response.json())
@@ -22,313 +195,299 @@ function fetchAlbumData(folderPath) {
             albumTracks = data.musicFiles.map(file => {
                 const encodedFolderPath = encodeURIComponent(folderPath).replace(/%2F/g, '/');
                 return {
-                    file: `${musicBaseFolder}/${encodedFolderPath}/${file}`, // file is already Unicode
-                    name: file.replace('.mp3', '')
+                    file: `${musicBaseFolder}/${encodedFolderPath}/${encodeURIComponent(file)}`,
+                    name: file.replace('.mp3', ''),
+                    duration: data.trackDurations && data.trackDurations[file] ? Number(data.trackDurations[file]) : 0
                 };
             });
 
-            console.log("Loading album-player with: ", folderPath)
-            
-            // Set the album and artist elements
-            artistNameElement.textContent = data.albumInfo["artist"];
-            albumNameElement.textContent = data.albumInfo["album"];
-
-            const albumArt = data.albumArt;
-            // Set the album art
-            albumArtElement.src = `${albumArt}`;
+            artistNameElement.textContent = data.albumInfo.artist;
+            albumNameElement.textContent = data.albumInfo.album;
+            albumArtElement.src = data.albumArt || defaultAlbumArt;
 
             renderTrackList();
-            trackInfoElement.innerText = "Now Playing:"
+            trackInfoElement.innerText = 'Now Playing:';
         })
         .catch(error => console.error('Error fetching album data:', error));
 }
 
-// Example: Call fetchAlbumData based on user selection or a URL parameter
-function loadAlbumBasedOnUserSelection(albumPath) {
-    fetchAlbumData(albumPath);
-    // Call the function to render the track list on page load or when the album is set
-    console.log("THS ONE IT")
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    // Get the full URL search parameters
-    const urlParams = new URLSearchParams(window.location.search);
-
-    // Get the 'path' parameter from the URL, which represents the album folder path
-    const albumPath = urlParams.get('path');
-
-    // Check if the album path exists in the URL
-    if (albumPath) {
-        // Call fetchAlbumData with the decoded album path
-        fetchAlbumData(albumPath);
-        // fetchAlbumData(decodeURIComponent(albumPath));
-    } else {
-        console.error('No album path specified in the URL.');
+function playTrack(index, tracks, castOnly = false) {
+    if (!tracks.length) {
+        return;
     }
 
-    // Get references to the buttons and set up event listeners
-    const previousTrackButton = document.querySelector('button[aria-label="Previous Track"]');
-    const playPauseButton = document.querySelector('button[aria-label="Play / Pause"]');
-    const nextTrackButton = document.querySelector('button[aria-label="Next Track"]');
-
-    // Ensure the elements exist before attaching event listeners
-    if (previousTrackButton) {
-        previousTrackButton.addEventListener('click', function () {
-            previousTrack(albumTracks);  // Assuming albumTracks is defined
-        });
-    } else {
-        console.error('Previous track button not found');
-    }
-
-    if (playPauseButton) {
-        playPauseButton.addEventListener('click', function () {
-            togglePlayPause();  // Implement this function for play/pause functionality
-        });
-    } else {
-        console.error('Play/Pause button not found');
-    }
-
-    if (nextTrackButton) {
-        nextTrackButton.addEventListener('click', function () {
-            nextTrack(albumTracks);  // Assuming nextTrack is defined
-        });
-    } else {
-        console.error('Next track button not found');
-    }
-
-    // volume slide on change
-    const volumeSlider = document.getElementById('volume');
-    if (volumeSlider) {
-        volumeSlider.addEventListener('change', (event) => {
-            setVolume(event.target.value);
-        });
-    }
-});
-
-// Function to load and play a track
-function playTrack(index, albumTracks) {
     currentTrack = index;
 
-    if (sound) {
-        sound.stop(); // Stop any currently playing track
+    if (castOnly) {
+        castAudio(currentTrack);
+        return;
     }
-    console.log("track URL", albumTracks[currentTrack].file);
-    // Load the current track
+
+    stopLocalPlayback();
+
     sound = new Howl({
-        src: [albumTracks[currentTrack].file],
+        src: [tracks[currentTrack].file],
         preload: true,
         autoplay: true,
         html5: true,
-        volume: document.getElementById('volume').value,
+        volume: volumeSlider ? Number(volumeSlider.value) : 1,
+        onplay: function() {
+            setPlaybackState('local', true);
+        },
+        onpause: function() {
+            setPlaybackState('local', false);
+        },
+        onstop: function() {
+            clearProgressTimer();
+        },
         onend: function() {
-            nextTrack(albumTracks); // Automatically play the next track when one finishes
+            nextTrack(tracks, false);
         }
     });
 
-    // Display the track info
-    trackInfoElement.innerText = 'Now Playing: ' + albumTracks[currentTrack].name;
-
-    // Start playing the track and update play state
     sound.play();
-    isPlaying = true;
-
-    // Update track progress every 100ms
-    progressInterval = setInterval(updateProgress, 100);
-
-    // Start the spinning animation
-    // albumArtElement.classList.add('spin-animation');
+    updateCurrentTrackInfo(tracks[currentTrack].name);
 }
 
-// Function to play the next track
-function nextTrack(albumTracks) {
-    currentTrack = (currentTrack + 1) % albumTracks.length; // Loop back to the start
-    playTrack(currentTrack, albumTracks); // Load and play the next track
+function nextTrack(tracks, castOnly = activePlayback === 'cast') {
+    if (!tracks.length) {
+        return;
+    }
+    if (castOnly) {
+        const media = getCastMediaSession();
+        if (media && typeof media.queueNext === 'function') {
+            media.queueNext(
+                null,
+                () => {
+                    castCompletionHandled = false;
+                    syncCastMediaState(getCastMediaSession());
+                },
+                err => console.error('Failed to skip to next cast track', err)
+            );
+            return;
+        }
+    }
+    currentTrack = (currentTrack + 1) % tracks.length;
+    playTrack(currentTrack, tracks, castOnly);
 }
 
-// Function to play the previous track
-function previousTrack(albumTracks) {
-    currentTrack = (currentTrack - 1 + albumTracks.length) % albumTracks.length; // Loop back to the start
-    playTrack(currentTrack, albumTracks); // Load and play the next track
+function previousTrack(tracks, castOnly = activePlayback === 'cast') {
+    if (!tracks.length) {
+        return;
+    }
+    if (castOnly) {
+        const media = getCastMediaSession();
+        if (media && typeof media.queuePrev === 'function') {
+            media.queuePrev(
+                null,
+                () => {
+                    castCompletionHandled = false;
+                    syncCastMediaState(getCastMediaSession());
+                },
+                err => console.error('Failed to skip to previous cast track', err)
+            );
+            return;
+        }
+    }
+    currentTrack = (currentTrack - 1 + tracks.length) % tracks.length;
+    playTrack(currentTrack, tracks, castOnly);
 }
 
-// Function to pause the current track
 function pauseTrack() {
-    if (sound) {
-        sound.pause(); // Pause the currently playing track
-        clearInterval(progressInterval); // Clear the progress interval to stop updating the progress bar
+    if (activePlayback === 'cast') {
+        const media = getCastMediaSession();
+        if (!media) {
+            return;
+        }
+        media.pause(
+            null,
+            () => setPlaybackState('cast', false),
+            err => console.error('Failed to pause cast playback', err)
+        );
+        return;
+    }
 
-        // Stop the spinning animation
-        // albumArtElement.classList.remove('spin-animation');
-        isPlaying = false; // Update the state
+    if (!sound) {
+        return;
+    }
+
+    sound.pause();
+}
+
+function resumeTrack() {
+    if (activePlayback === 'cast') {
+        const media = getCastMediaSession();
+        if (!media) {
+            if (albumTracks.length) {
+                castAudio(currentTrack);
+            }
+            return;
+        }
+        media.play(
+            null,
+            () => setPlaybackState('cast', true),
+            err => console.error('Failed to resume cast playback', err)
+        );
+        return;
+    }
+
+    if (sound) {
+        sound.play();
     }
 }
 
-// Function to set the volume
+function togglePlayPause() {
+    if (!albumTracks.length) {
+        return;
+    }
+
+    if (!isPlaying && !isPaused) {
+        if (preferredPlayback === 'cast' && getCastSession()) {
+            castAudio(currentTrack);
+        } else {
+            playTrack(currentTrack, albumTracks);
+        }
+        return;
+    }
+
+    if (isPlaying) {
+        pauseTrack();
+    } else {
+        resumeTrack();
+    }
+}
+
 function setVolume(value) {
     if (sound) {
-        sound.volume(value); // Set the volume in real-time
+        sound.volume(Number(value));
     }
 }
 
-// Function to update the progress bar
 function updateProgress() {
-    if (sound && sound.playing()) {
-        const progress = sound.seek() / sound.duration(); // Get progress as a percentage
-        document.getElementById('progress').style.width = (progress * 100) + '%'; // Update progress bar
-    }
-}
-
-// Add event listener for seeking in the progress bar
-document.getElementById('progress-container').addEventListener('click', (event) => {
-    const progressBar = event.currentTarget;
-    const rect = progressBar.getBoundingClientRect(); // Get bounding box
-    const offsetX = event.clientX - rect.left; // Click position
-    const width = rect.width; // Width of the progress bar
-    const percentage = offsetX / width; // Calculate the percentage
-    const newTime = percentage * sound.duration(); // Calculate new time in seconds
-
-    if (sound) {
-        sound.seek(newTime); // Seek to new time
-        console.log('Seeking to:', newTime);
-    }
-});
-
-// Function to toggle play/pause
-function togglePlayPause() {
-    const playPauseText = document.getElementById('play-pause-text');
-
-    // If no track is currently loaded and the albumTracks array has tracks, play the first track
-    if (!isPlaying && albumTracks && albumTracks.length > 0 && !isPaused) {
-        playTrack(0, albumTracks); // Play the first track
-        playPauseText.textContent = 'Pause'; // Update button text
-
-        // Start the spinning animation
-        // albumArtElement.classList.add('spin-animation');
-        return; // Exit the function
+    if (!progressElement) {
+        return;
     }
 
-    if (sound) {
-        if (isPlaying) {
-            sound.pause(); // Pause the track
-            playPauseText.textContent = 'Play '; // Update button text
-            isPaused = true;
-
-            // Stop the spinning animation
-            // albumArtElement.classList.remove('spin-animation');
-        } else {
-            sound.play(); // Resume the track
-            playPauseText.textContent = 'Pause'; // Update button text
-            isPaused = false;
-
-            // Start the spinning animation
-            // albumArtElement.classList.add('spin-animation');
+    if (activePlayback === 'cast') {
+        const media = getCastMediaSession();
+        const castTrack = getCastTrackDetails(media);
+        const duration = getCurrentTrackDuration() || castTrack.duration;
+        if (media && duration) {
+            const progress = media.getEstimatedTime() / duration;
+            progressElement.style.width = `${Math.min(progress, 1) * 100}%`;
+        } else if (progressElement) {
+            progressElement.style.width = '0%';
         }
-        isPlaying = !isPlaying; // Toggle the state
+        return;
+    }
+
+    if (sound && sound.playing() && sound.duration()) {
+        const progress = sound.seek() / sound.duration();
+        progressElement.style.width = `${Math.min(progress, 1) * 100}%`;
     }
 }
 
-// Function to render the track list
 function renderTrackList() {
-    const trackListElement = document.getElementById('track-list');    
-    trackListElement.innerHTML = ''; // Clear existing list
-    console.log("GOT HERE")
-
-    // Populate the track list
+    trackListElement.innerHTML = '';
     albumTracks.forEach((track, index) => {
-        
-        // Set up the list item with flexbox
         const listItem = document.createElement('li');
-        listItem.style.display = 'flex';      // Use flex layout
-        listItem.style.alignItems = 'center'; // Center items vertically
+        listItem.style.display = 'flex';
+        listItem.style.alignItems = 'center';
         listItem.style.justifyContent = 'space-between';
 
-        // Create a centered container for the track name
         const trackNameContainer = document.createElement('div');
-        trackNameContainer.style.flex = '1';             // Take up available space
-        trackNameContainer.style.textAlign = 'center';   // Center-align text
+        trackNameContainer.style.flex = '1';
+        trackNameContainer.style.textAlign = 'center';
 
-        // Create the track name element
         const trackName = document.createElement('span');
         trackName.textContent = track.name;
-        // trackName.style.cursor = 'pointer';
-        // trackName.onclick = () => playTrack(index, albumTracks); // Play the clicked track
-
-        // Add the track name to the container
         trackNameContainer.appendChild(trackName);
 
-        // Create a container for the buttons
         const buttonContainer = document.createElement('div');
         buttonContainer.style.display = 'flex';
-        buttonContainer.style.gap = '5px'; // Space between buttons
+        buttonContainer.style.gap = '5px';
 
-        // Create the play button
         const playButton = document.createElement('button');
         playButton.innerHTML = '<img src="/static/icons/play_arrow_37dp_007BFF_FILL0_wght400_GRAD0_opsz40.svg" alt="Play" width="24" height="24">';
-        playButton.onclick = () => playTrack(index, albumTracks); // Play the clicked track
+        playButton.onclick = () => {
+            const shouldCast = preferredPlayback === 'cast' && !!getCastSession();
+            playTrack(index, albumTracks, shouldCast);
+        };
         playButton.style.padding = '2px';
         playButton.style.width = '30px';
         playButton.style.height = '30px';
 
-        // Create the download button
         const downloadButton = document.createElement('button');
         downloadButton.innerHTML = '<img src="/static/icons/download_37dp_007BFF_FILL0_wght400_GRAD0_opsz40.svg" alt="Download" width="24" height="24">';
-        downloadButton.onclick = () => downloadTrack(track); // Function to download the track
+        downloadButton.onclick = () => downloadTrack(track);
         downloadButton.style.padding = '2px';
         downloadButton.style.width = '30px';
         downloadButton.style.height = '30px';
 
-        // Append the buttons to the button container
         buttonContainer.appendChild(playButton);
         buttonContainer.appendChild(downloadButton);
 
-        // Append elements to the list item
-        listItem.appendChild(trackNameContainer); // Add centered track name
-        listItem.appendChild(buttonContainer);    // Add buttons aligned to the right
+        listItem.appendChild(trackNameContainer);
+        listItem.appendChild(buttonContainer);
 
-        // Append the list item to the track list
         trackListElement.appendChild(listItem);
-        console.log(listItem)
     });
-    console.log("Album tracks:", albumTracks);
 }
 
 function downloadTrack(track) {
     const link = document.createElement('a');
     link.href = track.file;
-    link.download = track.name + '.mp3';
+    link.download = `${track.name}.mp3`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
 }
 
-// Initialize Cast framework when the API is available
 window.__onGCastApiAvailable = function(isAvailable) {
     if (isAvailable) {
-        console.log("Cast API is available.");
         initializeCastContext();
-    } else {
-        console.error('Cast API is not available.');
     }
 };
 
-function initializeCastContext() {
-    // Ensure that cast is defined before trying to use it
-    console.log(cast);
-    if (typeof cast !== 'undefined') {
-        console.log("Initializing Cast Context...");
-        console.log('Cast framework:', window.cast.framework);
-        cast.framework.CastContext.getInstance().setOptions({
-            receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
-            autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED,
-        });
-        console.log('Cast framework:', window.cast.framework);
-    } else {
-        console.error("Cast API is not properly initialized.");
+function initializeCastContext(retries = 10) {
+    const context = getCastContext();
+    if (!context) {
+        if (retries > 0) {
+            window.setTimeout(() => initializeCastContext(retries - 1), 250);
+            return;
+        }
+        console.error('Cast API not initialized');
+        return;
     }
+
+    context.setOptions({
+        receiverApplicationId: chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
+        autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED
+    });
+
+    context.addEventListener(
+        cast.framework.CastContextEventType.SESSION_STATE_CHANGED,
+        event => {
+            if (
+                event.sessionState === cast.framework.SessionState.SESSION_STARTED ||
+                event.sessionState === cast.framework.SessionState.SESSION_RESUMED
+            ) {
+                preferredPlayback = 'cast';
+            } else if (event.sessionState === cast.framework.SessionState.SESSION_ENDED) {
+                preferredPlayback = 'local';
+                activePlayback = sound ? 'local' : null;
+                if (!sound) {
+                    clearProgressTimer();
+                    updatePlayPauseText('Play');
+                    isPlaying = false;
+                    isPaused = false;
+                }
+            }
+        }
+    );
 }
 
-// Cast audio to Chromecast
-function castAudio() {
+function castAudio(trackIndex = currentTrack) {
     console.log('Sound object:', sound);
 
     if (!sound) {
@@ -345,20 +504,114 @@ function castAudio() {
 
     const audioUrl = sound._src;
 
-    const castSession = cast.framework.CastContext.getInstance().getCurrentSession();
+    const session = getCastSession();
+    const track = albumTracks[trackIndex];
     if (!castSession) {
         console.error('No cast session available!');
         return;
     }
 
-    const mediaInfo = new chrome.cast.media.MediaInfo(audioUrl, 'audio/mp3');
-    const request = new chrome.cast.media.LoadRequest(mediaInfo);
+    if (!track || !track.file) {
+        console.error('Track data missing', track);
+        return;
+    }
 
-    castSession.loadMedia(request)
-        .then(() => console.log('Media loaded successfully'))
-        .catch((error) => console.error('Failed to load media:', error));
+    if (!session) {
+        console.error('No cast session available');
+        return;
+    }
+
+    stopLocalPlayback();
+
+    const mediaInfo = new chrome.cast.media.MediaInfo(track.file, 'audio/mp3');
+    mediaInfo.metadata = getAlbumMetadata(track.name);
+
+    const request = new chrome.cast.media.LoadRequest(mediaInfo);
+    request.queueData = buildCastQueueData(trackIndex);
+
+    session.loadMedia(request)
+        .then(() => {
+            currentTrack = trackIndex;
+            activePlayback = 'cast';
+            castCompletionHandled = false;
+            setPlaybackState('cast', true);
+            attachCastMediaListener(session.getMediaSession(), track.name);
+        })
+        .catch(err => console.error('Failed to load media on cast device', err));
 }
 
+document.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const albumPath = urlParams.get('path');
 
-// Bind cast button to castAudio function
-document.getElementById('cast-button').addEventListener('click', castAudio);
+    if (albumPath) {
+        fetchAlbumData(albumPath);
+    }
+
+    const previousTrackButton = document.querySelector('button[aria-label="Previous Track"]');
+    const playPauseButton = document.querySelector('button[aria-label="Play / Pause"]');
+    const nextTrackButton = document.querySelector('button[aria-label="Next Track"]');
+    const castButton = document.getElementById('cast-button');
+    const progressContainer = document.getElementById('progress-container');
+
+    if (previousTrackButton) {
+        previousTrackButton.addEventListener('click', () => previousTrack(albumTracks));
+    }
+    if (playPauseButton) {
+        playPauseButton.addEventListener('click', togglePlayPause);
+    }
+    if (nextTrackButton) {
+        nextTrackButton.addEventListener('click', () => nextTrack(albumTracks));
+    }
+    if (volumeSlider) {
+        volumeSlider.addEventListener('input', event => setVolume(event.target.value));
+    }
+    if (castButton) {
+        castButton.addEventListener('click', () => {
+            const session = getCastSession();
+            if (session) {
+                preferredPlayback = 'cast';
+                if (albumTracks.length) {
+                    castAudio(currentTrack);
+                }
+            }
+        });
+    }
+
+    if (progressContainer) {
+        progressContainer.addEventListener('click', event => {
+            const rect = event.currentTarget.getBoundingClientRect();
+            const offsetX = event.clientX - rect.left;
+            const percentage = offsetX / rect.width;
+
+            if (activePlayback === 'cast') {
+                const media = getCastMediaSession();
+                const duration = getCurrentTrackDuration();
+                if (!media || !duration) {
+                    return;
+                }
+                const seekRequest = new chrome.cast.media.SeekRequest();
+                seekRequest.currentTime = percentage * duration;
+                media.seek(
+                    seekRequest,
+                    () => updateProgress(),
+                    err => console.error('Failed to seek on cast device', err)
+                );
+                return;
+            }
+
+            if (!sound || !sound.duration()) {
+                return;
+            }
+
+            sound.seek(percentage * sound.duration());
+            updateProgress();
+        });
+    }
+
+    window.setInterval(() => {
+        if (activePlayback === 'cast') {
+            syncCastMediaState(getCastMediaSession());
+        }
+    }, 1000);
+});

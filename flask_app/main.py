@@ -1,17 +1,14 @@
-from flask import Flask, send_from_directory
-from home import home_bp
-from api import music_bp
 import os
+from flask import Flask, send_from_directory
 
+from .api import music_bp
+from .home import home_bp
 
 app = Flask(
     __name__,
     static_folder='../static',
     template_folder='templates'
 )
-
-# Define a relative path to the media directory
-MEDIA_FOLDER = os.path.join(os.path.dirname(__file__), '../media')
 
 # Register the Blueprints
 app.register_blueprint(home_bp, url_prefix='/')  # This will handle the homepage route

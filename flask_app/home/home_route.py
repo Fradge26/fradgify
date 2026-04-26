@@ -1,15 +1,13 @@
-from flask import Response, render_template
-from . import home_bp
 import os
+from collections import defaultdict
+from flask import Response, render_template
 from pathlib import Path
 from urllib.parse import quote_from_bytes
-from collections import defaultdict
+
+from . import home_bp
+from ..paths import MEDIA_DIR, APP_ROOT, MUSIC_DIR_REL
 
 
-SERVER_SITE_HOME = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-MEDIA_DIR = os.path.join(SERVER_SITE_HOME, "media")
-SITE_DOMAIN = "dev.fradgify.kozow.com"
-CWD_DIR = os.getcwd()
 VIDEO_EXT = {'.mp4', '.avi', '.mov', '.mkv', '.wmv', '.flv', '.webm', '.mpeg', '.mpg'}
 AUDIO_EXT = {".mp3"}
 SHEET_EXT = {".pdf"}
@@ -33,7 +31,7 @@ def homepage():
         for file in files:
             filename = file.replace(os.sep, '/').split('/')[-1]
             if library == "Music":
-                href_path = quote_apache(file[21:])
+                href_path = quote_apache(os.path.relpath(file, MUSIC_DIR_REL))
                 normalized_latest_files[library].append({
                     "text": filename,
                     "href": f"/music/play/?path={href_path}"
@@ -69,17 +67,31 @@ def quote_apache(path: str) -> str:
     return quote_from_bytes(path_bytes, safe=b'/')
 
 
+def quote_apache(path: str) -> str:
+    """
+    Quote a filesystem path so that it matches Apache autoindex hrefs.
+    Handles surrogate pairs and arbitrary byte sequences.
+    """
+    # Step 1: Convert to the raw filesystem bytes representation
+    # This ensures we get the same byte values Apache uses
+    path_bytes = os.fsencode(path.replace(os.sep, '/'))
+    path_quoted = quote_from_bytes(path_bytes, safe=b'/')
+
+    # Step 2: Percent-encode all non-ASCII bytes, leaving '/' safe
+    return path_quoted
+
+
 def get_latest(library, exts, num_files=10):
     directory_url = os.path.join(MEDIA_DIR, library.lower())
     folders = get_recent_folders(directory_url, exts, num_files)
-    relative_paths = [os.path.relpath(folder, SERVER_SITE_HOME) for folder in folders]
+    relative_paths = [os.path.relpath(folder, APP_ROOT) for folder in folders]
     return relative_paths
 
 
 def list_video_folders(directory, exts):
     video_files = []
     top_level_dir = os.path.basename(os.path.normpath(directory))
-    for dirpath, dirnames, filenames in os.walk(os.path.join(SERVER_SITE_HOME, directory)):
+    for dirpath, dirnames, filenames in os.walk(os.path.join(APP_ROOT, directory)):
         if os.path.basename(dirpath) == top_level_dir:
             continue
         for entry in filenames:
