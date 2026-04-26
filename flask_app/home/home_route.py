@@ -9,6 +9,7 @@ from collections import defaultdict
 
 SERVER_SITE_HOME = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 MEDIA_DIR = os.path.join(SERVER_SITE_HOME, "media")
+MUSIC_DIR_REL = os.path.join("media", "music", "complete")
 CWD_DIR = os.getcwd()
 VIDEO_EXT = {'.mp4', '.avi', '.mov', '.mkv', '.wmv', '.flv', '.webm', '.mpeg', '.mpg'}
 AUDIO_EXT = {".mp3"}
@@ -33,7 +34,7 @@ def homepage():
         for file in files:
             filename = file.replace(os.sep, '/').split('/')[-1]
             if library == "Music":
-                href_path = quote_apache(file[21:])
+                href_path = quote_apache(os.path.relpath(file, MUSIC_DIR_REL))
                 normalized_latest_files[library].append({
                     "text": filename,
                     "href": f"/music/play/?path={href_path}"
