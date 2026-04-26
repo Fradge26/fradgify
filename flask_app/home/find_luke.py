@@ -1,12 +1,14 @@
-from . import home_bp
-import os
-import re
 import gzip
 import json
-from urllib.parse import unquote
-from urllib.request import urlopen
+import os
+import re
 import requests
 from flask import Flask, render_template
+from urllib.parse import unquote
+from urllib.request import urlopen
+
+from . import home_bp
+from ..paths import APACHE_LOG_DIR
 
 
 @home_bp.route('/whereisluke')
@@ -14,33 +16,38 @@ def where_is_luke():
     print("print working")
     luke_is_safe = False
     # Paths to the Apache access log and rotated logs
-    log_dir_path = '/var/log/apache2/'
-    # log_dir_path = "D:/dump/"
-    current_log = log_dir_path + 'access.log'
-    rotated_log_pattern = re.compile(r'access\.log\.\d+\.gz')
+    current_log = APACHE_LOG_DIR / 'access.log'
+    rotated_log_pattern = re.compile(r'access\.log\.(\d+)\.gz')
     # Regex pattern to match IP, time, and requested filename from an Apache log line
     log_pattern = r'^(\S+) - - \[(.*?)\] "GET (/[^ ]+)'
 
     buzzcocks_lines = []
-    if os.path.exists(current_log):
+    decoded_filename, time, ip_address, lat, lng, city, country = [None] * 7
+    if APACHE_LOG_DIR.exists():
         print("path exists")
         try:
             # Check the current log file
-            read_log_file(current_log, buzzcocks_lines)
+            if current_log.exists():
+                read_log_file(current_log, buzzcocks_lines)
 
             if not buzzcocks_lines:
-                current_log = log_dir_path + 'access.log.1'
-                read_log_file(current_log, buzzcocks_lines)
+                rotated_log_1 = APACHE_LOG_DIR / 'access.log.1'
+                if rotated_log_1.exists():
+                    read_log_file(rotated_log_1, buzzcocks_lines)
 
             # Check the older rotated logs (access.log.*.gz)
             if not buzzcocks_lines:
-                for filename in sorted(os.listdir(log_dir_path)):
-                    print(filename)
-                    if rotated_log_pattern.match(filename):
-                        print(f"reading {filename}")
-                        read_log_file(os.path.join(log_dir_path, filename), buzzcocks_lines)
-                        if buzzcocks_lines:
-                            break
+                rotated_logs = []
+                for filename in os.listdir(APACHE_LOG_DIR):
+                    match = rotated_log_pattern.fullmatch(filename)
+                    if match:
+                        rotated_logs.append((int(match.group(1)), filename))
+
+                for _, filename in sorted(rotated_logs):
+                    print(f"reading {filename}")
+                    read_log_file(APACHE_LOG_DIR / filename, buzzcocks_lines)
+                    if buzzcocks_lines:
+                        break
 
             # Get the most recent line
             if buzzcocks_lines:
@@ -61,9 +68,8 @@ def where_is_luke():
                     decoded_filename = unquote(raw_filename)
 
                     # Get IP geolocation (latitude and longitude)
-                    lat, lng, city, country = get_ip_location(ip_address)
-                    luke_is_safe = True
-                elif len(match.groups()) < 3:
+                    luke_is_safe, lat, lng, city, country = get_ip_location(ip_address)
+                elif match and len(match.groups()) < 3:
                     print(match.groups())
         except Exception as e:
             print(e)
@@ -84,7 +90,7 @@ def where_is_luke():
 # Function to read and filter log lines from both current and older logs
 def read_log_file(log_file_path, buzzcocks_lines):
     try:
-        if log_file_path.endswith('.gz'):
+        if log_file_path.suffix == '.gz':
             with gzip.open(log_file_path, 'rt') as log_file:
                 buzzcocks_lines.extend([line for line in log_file if 'Buzzcocks' in line and 'Googlebot' not in line])
         else:
@@ -97,13 +103,13 @@ def read_log_file(log_file_path, buzzcocks_lines):
 # Function to get IP location using ipinfo.io
 def get_ip_location(ip):
     try:
-        response = requests.get(f'https://ipinfo.io/{ip}/geo')
+        response = requests.get(f'https://ipinfo.io/{ip}/geo', timeout=2)
         if response.status_code == 200:
             data = response.json()
             loc = data.get('loc', None)  # loc is a string like "lat,lng"
             if loc:
                 lat, lng = map(float, loc.split(','))
-                return lat, lng, data["city"], data["country"]
+                return True, lat, lng, data["city"], data["country"]
     except Exception as e:
         print(f"Error fetching IP location: {e}")
-    return None, None, None, None
+    return False, None, None, None, None

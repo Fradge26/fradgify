@@ -29,16 +29,13 @@
         </ul>
 
         {% if lat and lng %}
-            <div id="map" style="height: 600px;"></div>
-            <script>
-                var map = L.map('map').setView([{{ lat }}, {{ lng }}], 5);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    maxZoom: 19,
-                }).addTo(map);
-
-                var marker = L.marker([{{ lat }}, {{ lng }}]).addTo(map);
-                marker.bindPopup("<b>IP Location</b><br>Lat: {{ lat }}<br>Lng: {{ lng }}").openPopup();
-            </script>
+            <div
+                id="map"
+                style="height: 600px;"
+                data-lat="{{ lat }}"
+                data-lng="{{ lng }}"
+            ></div>
+            <script src="{{ url_for('static', filename='js/luke-map.js') }}"></script>
         {% endif %}
     {% else %}
         <p>{{ error }}</p>
