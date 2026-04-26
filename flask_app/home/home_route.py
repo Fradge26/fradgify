@@ -1,16 +1,14 @@
-from flask import Response, render_template
-from . import home_bp
 import os
-import re
+from collections import defaultdict
+from flask import Response, render_template
 from pathlib import Path
 from urllib.parse import quote_from_bytes
-from collections import defaultdict
 
+from . import home_bp
 
 SERVER_SITE_HOME = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 MEDIA_DIR = os.path.join(SERVER_SITE_HOME, "media")
 MUSIC_DIR_REL = os.path.join("media", "music", "complete")
-CWD_DIR = os.getcwd()
 VIDEO_EXT = {'.mp4', '.avi', '.mov', '.mkv', '.wmv', '.flv', '.webm', '.mpeg', '.mpg'}
 AUDIO_EXT = {".mp3"}
 SHEET_EXT = {".pdf"}
