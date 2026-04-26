@@ -1,12 +1,13 @@
-from . import home_bp
-import os
-import re
 import gzip
 import json
-from urllib.parse import unquote
-from urllib.request import urlopen
+import os
+import re
 import requests
 from flask import Flask, render_template
+from urllib.parse import unquote
+from urllib.request import urlopen
+
+from . import home_bp
 
 
 @home_bp.route('/whereisluke')

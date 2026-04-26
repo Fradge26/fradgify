@@ -1,23 +1,19 @@
-from . import music_bp
+import hashlib
+import io
+import json
 import logging
 import os
+from PIL import Image
+from datetime import datetime as dt
 from flask import jsonify, send_from_directory, request, render_template
 from mutagen import File
 from mutagen.id3 import ID3, APIC
-from PIL import Image
-import json
-import hashlib
-from datetime import datetime as dt
 from pathlib import Path
-import io
+
+from . import music_bp
+from ..paths import MUSIC_DIR, ALBUMS_JSON_PATH, ALBUM_ART_DIR, ALBUM_ART_DIR_URL
 
 
-SITE_HOME = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-MEDIA_DIR = os.path.join(SITE_HOME, "media")
-MUSIC_DIR = os.path.join(MEDIA_DIR, "music", "complete")
-ALBUMS_JSON_PATH = os.path.join(SITE_HOME, "static", "json", "albums.json")
-ALBUM_ART_REL_DIR = os.path.join("/", "static", "album-art")
-ALBUM_ART_DIR = os.path.join(SITE_HOME, "static", "album-art")
 logging.debug(f"api started: {__file__}")
 
 
@@ -143,7 +139,7 @@ def get_album_art_path(album_path, audio):
     short_hash = hash_object.hexdigest()[:12]
     album_art_filename = short_hash + ".jpg"
     album_art_filepath = os.path.join(ALBUM_ART_DIR, album_art_filename)
-    album_art_rel_filepath = os.path.join(ALBUM_ART_REL_DIR, album_art_filename)
+    album_art_rel_filepath = os.path.join(ALBUM_ART_DIR_URL, album_art_filename)
 
     if os.path.exists(album_art_filepath):
         return album_art_rel_filepath
@@ -165,7 +161,7 @@ def get_album_art_path(album_path, audio):
             logging.debug(f"Album art extracted to: {album_art_filepath}")
             return album_art_rel_filepath
     else:
-        return os.path.join(ALBUM_ART_REL_DIR, "default_album_art.jpg")
+        return os.path.join(ALBUM_ART_DIR_URL, "default_album_art.jpg")
 
 
 def get_audio_file_info(audio):

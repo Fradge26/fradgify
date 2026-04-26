@@ -5,10 +5,9 @@ from pathlib import Path
 from urllib.parse import quote_from_bytes
 
 from . import home_bp
+from ..paths import MEDIA_DIR, APP_ROOT, MUSIC_DIR_REL
 
-SERVER_SITE_HOME = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-MEDIA_DIR = os.path.join(SERVER_SITE_HOME, "media")
-MUSIC_DIR_REL = os.path.join("media", "music", "complete")
+
 VIDEO_EXT = {'.mp4', '.avi', '.mov', '.mkv', '.wmv', '.flv', '.webm', '.mpeg', '.mpg'}
 AUDIO_EXT = {".mp3"}
 SHEET_EXT = {".pdf"}
@@ -73,14 +72,14 @@ def quote_apache(path: str) -> str:
 def get_latest(library, exts, num_files=10):
     directory_url = os.path.join(MEDIA_DIR, library.lower())
     folders = get_recent_folders(directory_url, exts, num_files)
-    relative_paths = [os.path.relpath(folder, SERVER_SITE_HOME) for folder in folders]
+    relative_paths = [os.path.relpath(folder, APP_ROOT) for folder in folders]
     return relative_paths
 
 
 def list_video_folders(directory, exts):
     video_files = []
     top_level_dir = os.path.basename(os.path.normpath(directory))
-    for dirpath, dirnames, filenames in os.walk(os.path.join(SERVER_SITE_HOME, directory)):
+    for dirpath, dirnames, filenames in os.walk(os.path.join(APP_ROOT, directory)):
         if os.path.basename(dirpath) == top_level_dir:
             continue
         for entry in filenames:
