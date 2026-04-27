@@ -488,28 +488,8 @@ function initializeCastContext(retries = 10) {
 }
 
 function castAudio(trackIndex = currentTrack) {
-    console.log('Sound object:', sound);
-
-    if (!sound) {
-        console.error('Sound object is not defined!');
-        return;
-    }
-
-    console.log('Sound._src:', sound._src);
-
-    if (!sound._src) {
-        console.error('Sound._src is not set!');
-        return;
-    }
-
-    const audioUrl = sound._src;
-
     const session = getCastSession();
     const track = albumTracks[trackIndex];
-    if (!castSession) {
-        console.error('No cast session available!');
-        return;
-    }
 
     if (!track || !track.file) {
         console.error('Track data missing', track);

@@ -81,6 +81,20 @@ def quote_apache(path: str) -> str:
     return path_quoted
 
 
+def quote_apache(path: str) -> str:
+    """
+    Quote a filesystem path so that it matches Apache autoindex hrefs.
+    Handles surrogate pairs and arbitrary byte sequences.
+    """
+    # Step 1: Convert to the raw filesystem bytes representation
+    # This ensures we get the same byte values Apache uses
+    path_bytes = os.fsencode(path.replace(os.sep, '/'))
+    path_quoted = quote_from_bytes(path_bytes, safe=b'/')
+
+    # Step 2: Percent-encode all non-ASCII bytes, leaving '/' safe
+    return path_quoted
+
+
 def get_latest(library, exts, num_files=10):
     directory_url = os.path.join(MEDIA_DIR, library.lower())
     folders = get_recent_folders(directory_url, exts, num_files)
